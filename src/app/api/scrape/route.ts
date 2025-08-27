@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
 import chromium from '@sparticuz/chromium';
 import * as cheerio from 'cheerio';
 
@@ -81,19 +81,26 @@ export async function POST(request: NextRequest) {
     ];
 
     // Launch browser with optimized settings for Vercel (JavaScript enabled for dynamic content)
-    browser = await puppeteer.launch({
-      headless: true,
-      // Use @sparticuz/chromium on Vercel for better compatibility
-      ...(process.env.VERCEL
-        ? {
-            executablePath: await chromium.executablePath(),
-            args: [...chromium.args, ...browserArgs],
-          }
-        : {
-            args: browserArgs,
-          }),
-      timeout: 30000,
-    });
+    let launchConfig;
+    
+    if (process.env.VERCEL) {
+      // Vercel environment - use @sparticuz/chromium
+      launchConfig = {
+        headless: true,
+        executablePath: await chromium.executablePath(),
+        args: [...chromium.args, ...browserArgs],
+        timeout: 30000,
+      };
+    } else {
+      // Local development - use system Chrome or add puppeteer for local dev
+      launchConfig = {
+        headless: true,
+        args: browserArgs,
+        timeout: 30000,
+      };
+    }
+    
+    browser = await puppeteer.launch(launchConfig);
     
     const page = await browser.newPage();
     

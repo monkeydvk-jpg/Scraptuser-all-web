@@ -21,7 +21,7 @@
     "lucide-react": "0.424.0",
     "framer-motion": "11.3.19",
     "axios": "1.7.2",
-    "puppeteer": "23.9.0",
+    "puppeteer-core": "23.9.0",
     "@sparticuz/chromium": "131.0.1",
     "cheerio": "1.0.0-rc.12",
     "file-saver": "2.0.5",
