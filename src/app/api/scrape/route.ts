@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
+import chromium from '@sparticuz/chromium';
 import * as cheerio from 'cheerio';
 
 interface ScrapingRequest {
@@ -50,26 +51,47 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // Define common browser args
+    const browserArgs = [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--disable-web-security',
+      '--disable-features=VizDisplayCompositor',
+      '--disable-extensions',
+      '--disable-plugins',
+      // JavaScript and images enabled for full rendering like Python version
+      '--disable-default-apps',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-background-timer-throttling',
+      '--disable-renderer-backgrounding',
+      '--disable-background-media-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-breakpad',
+      '--disable-component-extensions-with-background-pages',
+      '--disable-ipc-flooding-protection',
+      '--disable-hang-monitor',
+      '--disable-features=TranslateUI',
+      '--disable-features=BlinkGenPropertyTrees',
+      '--run-all-compositor-stages-before-draw',
+      '--memory-pressure-off',
+    ];
+
     // Launch browser with optimized settings for Vercel (JavaScript enabled for dynamic content)
     browser = await puppeteer.launch({
       headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-        '--disable-extensions',
-        '--disable-plugins',
-        // JavaScript and images enabled for full rendering like Python version
-        '--disable-default-apps',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-background-timer-throttling',
-        '--disable-renderer-backgrounding',
-      ],
+      // Use @sparticuz/chromium on Vercel for better compatibility
+      ...(process.env.VERCEL
+        ? {
+            executablePath: await chromium.executablePath(),
+            args: [...chromium.args, ...browserArgs],
+          }
+        : {
+            args: browserArgs,
+          }),
       timeout: 30000,
     });
     
