@@ -10,7 +10,11 @@ export const metadata: Metadata = {
   description: 'AI-Powered Content Scraping with Modern Web UI - V2.0',
   keywords: ['adobe stock', 'prompt generator', 'content scraping', 'ai tools'],
   authors: [{ name: 'Adobe Stock Scraper Team' }],
-  viewport: 'width=device-width, initial-scale=1',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({

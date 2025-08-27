@@ -11,7 +11,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, title, icon, children, ...props }, ref) => {
+  ({ className, title, icon, children, onClick, onMouseEnter, onMouseLeave, ...props }, ref) => {
     const { theme } = useAppStore();
     
     return (
@@ -22,7 +22,9 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         transition={{ duration: 0.3 }}
         className={clsx('card overflow-hidden', className)}
         style={{ backgroundColor: theme.colors.frameBg }}
-        {...props}
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         {title && (
           <div 
