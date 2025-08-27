@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
 import * as cheerio from 'cheerio';
 
 interface ScrapingRequest {
@@ -23,7 +21,6 @@ interface ScrapingRequest {
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  let browser;
   
   try {
     const body: ScrapingRequest = await request.json();
@@ -51,108 +48,54 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Define common browser args
-    const browserArgs = [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--disable-web-security',
-      '--disable-features=VizDisplayCompositor',
-      '--disable-extensions',
-      '--disable-plugins',
-      // JavaScript and images enabled for full rendering like Python version
-      '--disable-default-apps',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-background-timer-throttling',
-      '--disable-renderer-backgrounding',
-      '--disable-background-media-throttling',
-      '--disable-backgrounding-occluded-windows',
-      '--disable-breakpad',
-      '--disable-component-extensions-with-background-pages',
-      '--disable-ipc-flooding-protection',
-      '--disable-hang-monitor',
-      '--disable-features=TranslateUI',
-      '--disable-features=BlinkGenPropertyTrees',
-      '--run-all-compositor-stages-before-draw',
-      '--memory-pressure-off',
-    ];
-
-    // Launch browser with optimized settings for Vercel (JavaScript enabled for dynamic content)
-    let launchConfig;
-    
-    if (process.env.VERCEL) {
-      // Vercel environment - use @sparticuz/chromium
-      launchConfig = {
-        headless: true,
-        executablePath: await chromium.executablePath(),
-        args: [...chromium.args, ...browserArgs],
-        timeout: 30000,
-      };
-    } else {
-      // Local development - use system Chrome or add puppeteer for local dev
-      launchConfig = {
-        headless: true,
-        args: browserArgs,
-        timeout: 30000,
-      };
-    }
-    
-    browser = await puppeteer.launch(launchConfig);
-    
-    const page = await browser.newPage();
-    
-    // Set user agent and viewport
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    );
-    await page.setViewport({ width: 1920, height: 1080 });
-    
-    // Don't block any resources to ensure full page rendering like Python version
-    // This matches the Python Selenium approach which loads everything
-    
     const allTitles: string[] = [];
     let successfulPages = 0;
     let failedPages = 0;
+    
+    // HTTP headers to mimic a real browser
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.5',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'DNT': '1',
+      'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+    };
     
     for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
       try {
         const pageUrl = `${url}&search_page=${pageNum}`;
         
-        // Navigate with timeout
-        await page.goto(pageUrl, {
-          waitUntil: 'networkidle0', // Wait for network to be idle
-          timeout: 30000
+        // Fetch page content using HTTP request
+        console.log(`Fetching page ${pageNum}: ${pageUrl}`);
+        
+        const response = await fetch(pageUrl, {
+          headers,
+          method: 'GET',
+          cache: 'no-cache',
         });
         
-        // Wait longer for dynamic content to load
-        console.log('Waiting for dynamic content to load...');
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        
-        // Try to wait for specific elements that might indicate assets are loaded
-        try {
-          await page.waitForSelector('img, [data-testid], [data-title], .asset, .result', {
-            timeout: 5000
-          });
-          console.log('Found asset-related elements');
-        } catch (waitError) {
-          console.log('No asset elements found within timeout, proceeding...');
+        if (!response.ok) {
+          console.error(`Failed to fetch page ${pageNum}: ${response.status}`);
+          failedPages++;
+          continue;
         }
         
-        // Get page content
-        const content = await page.content();
+        const content = await response.text();
         
         // Debug logging
         console.log(`\n=== PAGE ${pageNum} DEBUG ===`);
         console.log(`URL: ${pageUrl}`);
         console.log(`Content length: ${content.length}`);
-        console.log(`Page title: ${await page.title()}`);
+        // Extract page title from HTML
+        const titleMatch = content.match(/<title>(.*?)<\/title>/i);
+        const pageTitle = titleMatch ? titleMatch[1] : 'No title found';
+        console.log(`Page title: ${pageTitle}`);
         
         // Check if page loaded successfully (more specific error detection)
-        if (content.includes('404 Not Found') || content.includes('Page not found') || content.length < 50000) {
-          console.warn(`Page ${pageNum} might have failed to load properly`);
+        if (content.includes('404 Not Found') || content.includes('Page not found') || content.length < 10000) {
+          console.warn(`Page ${pageNum} might have failed to load properly (length: ${content.length})`);
           failedPages++;
           continue;
         }
@@ -352,13 +295,5 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     );
-  } finally {
-    if (browser) {
-      try {
-        await browser.close();
-      } catch (closeError) {
-        console.error('Error closing browser:', closeError);
-      }
-    }
   }
 }
