@@ -21,6 +21,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     loading = false,
     children,
     disabled,
+    onClick,
+    type,
     ...props 
   }, ref) => {
     const { theme } = useAppStore();
@@ -85,7 +87,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         style={getVariantStyles()}
         disabled={disabled || loading}
-        {...props}
+        onClick={onClick}
+        type={type}
       >
         {loading ? (
           <motion.div

@@ -70,7 +70,7 @@ A modern, responsive web application for scraping Adobe Stock content and genera
 ## 🚀 Deployment on Vercel
 
 ### Quick Deploy
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=YOUR_REPO_URL)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/monkeydvk-jpg/Scraptuser-all-web)
 
 ### Manual Deployment
 
