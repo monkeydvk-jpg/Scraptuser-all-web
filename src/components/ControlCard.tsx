@@ -72,6 +72,7 @@ export function ControlCard() {
           includeParams: config.includeParams,
           includeAspectRatio: config.includeAspectRatio,
           toLowerCase: config.toLowerCase,
+          addEmptyLine: config.addEmptyLine,
           prefix: config.prefix,
           suffix: config.suffix,
           aspectRatio: config.aspectRatio,

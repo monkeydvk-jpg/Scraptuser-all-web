@@ -12,6 +12,7 @@ interface ScrapingRequest {
     includeParams: boolean;
     includeAspectRatio: boolean;
     toLowerCase: boolean;
+    addEmptyLine: boolean;
     prefix: string;
     suffix: string;
     aspectRatio: string;
@@ -262,6 +263,11 @@ export async function POST(request: NextRequest) {
         }
         
         formattedPrompts.push(prompt);
+        
+        // Add empty line if option is enabled
+        if (config.addEmptyLine) {
+          formattedPrompts.push('');
+        }
       }
     });
     
