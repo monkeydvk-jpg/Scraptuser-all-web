@@ -27,6 +27,7 @@ export interface ScrapingConfig {
   includeParams: boolean;
   includeAspectRatio: boolean;
   toLowerCase: boolean;
+  addEmptyLine: boolean;
   prefix: string;
   suffix: string;
   aspectRatio: string;

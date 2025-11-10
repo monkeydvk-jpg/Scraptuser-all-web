@@ -42,6 +42,7 @@ const defaultConfig: ScrapingConfig = {
   includeParams: true,
   includeAspectRatio: true,
   toLowerCase: false,
+  addEmptyLine: false,
   prefix: generateRandomPrefix(),
   suffix: 'dumnaf',
   aspectRatio: '16:9',

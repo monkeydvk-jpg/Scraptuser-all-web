@@ -16,6 +16,7 @@ export function FormatCard() {
     { key: 'includeParams', label: '⚡ Include Parameters', value: config.includeParams },
     { key: 'includeAspectRatio', label: '📐 Include Aspect Ratio', value: config.includeAspectRatio },
     { key: 'toLowerCase', label: '🔤 Convert to Lowercase', value: config.toLowerCase },
+    { key: 'addEmptyLine', label: '↩️ Add Empty Line', value: config.addEmptyLine },
   ];
   
   return (
