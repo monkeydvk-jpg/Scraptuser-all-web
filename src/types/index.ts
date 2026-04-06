@@ -62,6 +62,47 @@ export interface SocketEvents {
   'scraping-error': (error: string) => void;
 }
 
+// Analytics types
+export interface StockAsset {
+  id: number;
+  title: string;
+  nb_downloads: number;
+  creation_date: string;
+  creator_name: string;
+  creator_id: number;
+  category: { id: number; name: string };
+  thumbnail_url: string;
+  thumbnail_240_url: string;
+  keywords: { name: string }[];
+  content_type: string;
+  is_gentech: boolean;
+}
+
+export interface AnalyticsSummary {
+  totalResults: number;
+  enrichedFiles: number;
+  avgDownloads: number;
+  topDownloads: number;
+}
+
+export interface AnalyticsResponse {
+  success: boolean;
+  files: StockAsset[];
+  summary: AnalyticsSummary;
+  nb_results: number;
+  error?: string;
+}
+
+export const CONTENT_TYPE_FILTERS = [
+  { key: 'all', label: 'All Assets' },
+  { key: 'image/jpeg', label: 'Photos' },
+  { key: 'image/png', label: 'Illustrations' },
+  { key: 'image/svg+xml', label: 'Vectors' },
+  { key: 'video', label: 'Videos' },
+  { key: 'application', label: 'Templates' },
+  { key: '3d', label: '3D' },
+] as const;
+
 export const THEMES: Record<string, Theme> = {
   cyberpunk: {
     name: 'Cyberpunk',

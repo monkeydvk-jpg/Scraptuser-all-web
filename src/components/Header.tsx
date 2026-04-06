@@ -2,10 +2,18 @@
 
 import { useAppStore } from '@/lib/store';
 import { THEMES } from '@/types';
-import { Palette } from 'lucide-react';
+import { Palette, Zap, BarChart3 } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function Header() {
   const { theme, currentTheme, setTheme } = useAppStore();
+  const pathname = usePathname();
+
+  const navItems = [
+    { href: '/', label: 'Prompt Generator', icon: <Zap className="w-4 h-4" /> },
+    { href: '/analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" /> },
+  ];
   
   return (
     <header 
@@ -19,22 +27,35 @@ export function Header() {
         <div className="flex items-center justify-between">
           <div>
             <h1 
-              className="text-2xl md:text-3xl font-bold flex items-center gap-2"
+              className="text-xl md:text-2xl font-bold flex items-center gap-2"
               style={{ color: theme.colors.highlight }}
             >
-              🚀 Adobe Stock Prompt Generator Pro
+              🚀 Adobe Stock Tools Pro
             </h1>
-            <p 
-              className="text-sm md:text-base mt-1"
-              style={{ color: theme.colors.labelFg }}
-            >
-              AI-Powered Content Scraping with Modern Web UI • V2.0
-            </p>
+            <nav className="flex items-center gap-1 mt-2">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                    style={{
+                      backgroundColor: isActive ? theme.colors.highlight : 'transparent',
+                      color: isActive ? '#fff' : theme.colors.labelFg,
+                    }}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
           
           <div className="flex items-center gap-3">
             <Palette 
-              className="w-5 h-5"
+              className="w-5 h-5 hidden md:block"
               style={{ color: theme.colors.labelFg }}
             />
             <select 

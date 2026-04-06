@@ -6,6 +6,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'stock.adobe.com',
       },
+      {
+        protocol: 'https',
+        hostname: '**.ftcdn.net',
+      },
     ],
   },
   env: {
