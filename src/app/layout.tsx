@@ -1,15 +1,19 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import { Toaster } from 'react-hot-toast';
+import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
+import { ThemedToaster } from '@/components/ThemedToaster';
+import { CommandPalette } from '@/components/CommandPalette';
+import { ThemeApplier } from '@/components/ThemeApplier';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-display' });
 
 export const metadata: Metadata = {
-  title: '🚀 Adobe Stock Prompt Generator Pro',
-  description: 'AI-Powered Content Scraping with Modern Web UI - V2.0',
-  keywords: ['adobe stock', 'prompt generator', 'content scraping', 'ai tools'],
-  authors: [{ name: 'Adobe Stock Scraper Team' }],
+  title: 'Stocklytics — Adobe Stock Suite',
+  description: 'Prompt generation, portfolio analytics, keyword insights & trends for Adobe Stock.',
+  keywords: ['adobe stock', 'prompt generator', 'analytics', 'keyword insights', 'trends'],
+  authors: [{ name: 'Stocklytics' }],
 };
 
 export const viewport = {
@@ -23,20 +27,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        suppressHydrationWarning
+        className={`${inter.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} antialiased`}
+      >
+        <ThemeApplier />
         {children}
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#161b22',
-              color: '#c9d1d9',
-              border: '1px solid #1f6feb',
-            },
-          }}
-        />
+        <CommandPalette />
+        <ThemedToaster />
       </body>
     </html>
   );

@@ -1,11 +1,20 @@
 import { create } from 'zustand';
 import { ScrapingConfig, ScrapingProgress, Theme, THEMES } from '@/types';
+import type { Lang } from '@/lib/i18n';
 
 interface AppStore {
   // Theme state
   currentTheme: string;
   theme: Theme;
   setTheme: (themeName: string) => void;
+
+  // Language (i18n) state
+  lang: Lang;
+  setLang: (lang: Lang) => void;
+
+  // Command palette
+  cmdOpen: boolean;
+  setCmdOpen: (open: boolean) => void;
   
   // Scraping configuration
   config: ScrapingConfig;
@@ -61,7 +70,15 @@ export const useAppStore = create<AppStore>((set, get) => ({
       });
     }
   },
-  
+
+  // Language state
+  lang: 'vi',
+  setLang: (lang: Lang) => set({ lang }),
+
+  // Command palette
+  cmdOpen: false,
+  setCmdOpen: (open: boolean) => set({ cmdOpen: open }),
+
   // Scraping configuration
   config: defaultConfig,
   updateConfig: (updates: Partial<ScrapingConfig>) => {
