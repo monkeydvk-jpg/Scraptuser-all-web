@@ -69,6 +69,7 @@ export interface PortfolioOverview {
   aiSplit?: AiSplit;
   topKeywords?: KeywordStat[];
   topMovers?: MoverAsset[];
+  topDownloaded?: MoverAsset[]; // assets ranked by total downloads (up to 500)
   error?: string;
 }
 
@@ -201,6 +202,7 @@ export function computeOverview(
     .sort((a, b) => b.downloads - a.downloads)
     .slice(0, 20);
 
+  const topDownloaded = [...movers].sort((a, b) => b.nb_downloads - a.nb_downloads).slice(0, 500);
   const topMovers = movers.sort((a, b) => b.velocity - a.velocity).slice(0, 8);
 
   return {
@@ -233,5 +235,6 @@ export function computeOverview(
     },
     topKeywords,
     topMovers,
+    topDownloaded,
   };
 }

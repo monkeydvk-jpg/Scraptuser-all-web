@@ -262,6 +262,8 @@ export const STR: Record<string, Entry> = {
   an_timeline: { vi: 'Download theo tháng', en: 'Downloads by month' },
   an_mix: { vi: 'Tỷ trọng loại nội dung', en: 'Content-type mix' },
   an_top: { vi: 'Asset nổi bật', en: 'Top performing assets' },
+  an_topdl: { vi: 'Top download', en: 'Top downloads' },
+  an_topdl_sub: { vi: 'xếp theo lượt tải', en: 'ranked by downloads' },
   st_loading: { vi: 'Đang phân tích…', en: 'Analyzing…' },
 
   // Keyword Insights (redesign)

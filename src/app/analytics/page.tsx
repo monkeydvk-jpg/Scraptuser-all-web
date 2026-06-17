@@ -21,6 +21,7 @@ export default function AnalyticsPage() {
   const [data, setData] = useState<PortfolioOverview | null>(null);
   const [progress, setProgress] = useState(0);
   const [scanned, setScanned] = useState(0);
+  const [topN, setTopN] = useState<100 | 500>(100);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastQ = useRef('');
 
@@ -204,6 +205,48 @@ export default function AnalyticsPage() {
                   </a>
                 ))}
               </div>
+            </div>
+
+            <div className="card anim-up">
+              <div className="card-head">
+                <span className="icon-badge tint-success"><Download /></span>
+                <span className="ttl">{t('an_topdl')}</span>
+                <span className="sub">{t('an_topdl_sub')}</span>
+                <div className="row" style={{ marginLeft: 'auto', gap: 6 }}>
+                  {([100, 500] as const).map((n) => (
+                    <button
+                      key={n}
+                      className={'chip' + (topN === n ? ' sel' : '')}
+                      aria-pressed={topN === n}
+                      onClick={() => setTopN(n)}
+                    >
+                      Top {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {(data.topDownloaded?.length ?? 0) === 0 ? (
+                <p style={{ color: 'var(--label-fg)' }}>—</p>
+              ) : (
+                <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(168px, 1fr))', gap: 14 }}>
+                  {(data.topDownloaded ?? []).slice(0, topN).map((a, i) => (
+                    <a key={a.id} href={`https://stock.adobe.com/${a.id}`} target="_blank" rel="noreferrer" className="stack" style={{ gap: 9, textDecoration: 'none', color: 'inherit' }}>
+                      <div className="thumb lift" style={{ aspectRatio: '4 / 3' }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img className="ph" src={a.thumbnail_240_url} alt="" loading="lazy" style={{ objectFit: 'cover' }} />
+                        <span className="ext-badge"><ExternalLink style={{ width: 13, height: 13 }} /></span>
+                        <span className="rank gold" style={{ position: 'absolute', top: 8, left: 8, width: 22, height: 22, fontSize: 11 }}>{i + 1}</span>
+                      </div>
+                      <div className="row spread" style={{ gap: 8 }}>
+                        <span style={{ fontSize: 12.5, lineHeight: 1.3 }}>{a.title.slice(0, 60) || '—'}</span>
+                      </div>
+                      <span className="num" style={{ fontSize: 12, color: 'var(--label-fg)' }}>
+                        <Download style={{ width: 12, height: 12, verticalAlign: -1, marginRight: 4 }} />{fmt(a.nb_downloads)}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
