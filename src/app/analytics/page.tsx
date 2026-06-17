@@ -93,7 +93,8 @@ export default function AnalyticsPage() {
   };
   const exportTxt = () => {
     if (!topList.length) return;
-    const body = topList.map((a, i) => `${i + 1}. ${a.title}  —  ${a.nb_downloads} downloads  —  https://stock.adobe.com/${a.id}`).join('\n');
+    // Title only — one title per line
+    const body = topList.map((a) => a.title).filter((tt) => tt.trim()).join('\n');
     saveAs(new Blob([body], { type: 'text/plain;charset=utf-8' }), exportName('txt'));
   };
   const exportCsv = () => {
