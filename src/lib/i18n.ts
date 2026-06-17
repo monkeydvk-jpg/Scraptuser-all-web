@@ -176,6 +176,8 @@ export const STR: Record<string, Entry> = {
   // Generate run + KPIs
   gen_run: { vi: 'Bắt đầu scrape', en: 'Run scrape' },
   gen_running: { vi: 'Đang scrape…', en: 'Scraping…' },
+  gen_stop: { vi: 'Dừng', en: 'Stop' },
+  gen_stopped: { vi: 'Đã dừng scrape', en: 'Scraping stopped' },
   gen_preview: { vi: 'Xem trước prompt', en: 'Prompt preview' },
   gen_download: { vi: 'Tải .txt', en: 'Download .txt' },
   gen_scanned: { vi: 'Tiêu đề đã quét', en: 'Titles scanned' },

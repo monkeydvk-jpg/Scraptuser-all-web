@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { saveAs } from 'file-saver';
-import { Search, Zap, Sparkles, Play, Square, Download, RefreshCw, Dice5, Copy, Check } from 'lucide-react';
+import { Search, Zap, Sparkles, Play, Square, Download, RefreshCw, Dice5, Copy, Check, FileText, Table } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -29,8 +29,17 @@ export default function GeneratePage() {
   const [scraped, setScraped] = useState<string[] | null>(null);
   const [stats, setStats] = useState<ScrapeStats | null>(null);
   const [copied, setCopied] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
   // keep <body> background handled globally by ThemeApplier; nothing needed here
+
+  const stop = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setScrapingActive(false);
+    setProgress({ currentPage: 0, totalPages: 0, prompts: 0, status: 'idle', message: t('gen_stopped'), percentage: 0 });
+    toast(t('gen_stopped'));
+  };
 
   const run = async () => {
     if (isScrapingActive) return;
@@ -47,6 +56,8 @@ export default function GeneratePage() {
     setStats(null);
     const totalPages = config.endPage - config.startPage + 1;
     setProgress({ currentPage: 0, totalPages, prompts: 0, status: 'scraping', message: t('gen_running'), percentage: 0 });
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       const res = await axios.post('/api/scrape', {
         url: config.url,
@@ -58,7 +69,7 @@ export default function GeneratePage() {
           addEmptyLine: config.addEmptyLine, prefix: config.prefix, suffix: config.suffix,
           aspectRatio: config.aspectRatio, additionalParams: config.additionalParams,
         },
-      });
+      }, { signal: controller.signal });
       if (res.data.success) {
         setScraped(res.data.prompts);
         setStats(res.data.stats);
@@ -68,19 +79,32 @@ export default function GeneratePage() {
         throw new Error(res.data.error || 'failed');
       }
     } catch (err) {
+      if (axios.isCancel(err) || (err instanceof Error && err.name === 'CanceledError')) return; // stopped by user
       const msg = axios.isAxiosError(err) ? err.response?.data?.error || err.message : 'failed';
       setProgress({ currentPage: 0, totalPages, prompts: 0, status: 'error', message: msg, percentage: 0 });
       toast.error(msg);
     } finally {
+      abortRef.current = null;
       setScrapingActive(false);
     }
   };
 
+  const exportName = (ext: string) => {
+    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    return `${config.filename || 'prompts'}_${ts}.${ext}`;
+  };
   const download = () => {
     if (!scraped?.length) return;
-    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-    saveAs(new Blob([scraped.join('\n')], { type: 'text/plain;charset=utf-8' }), `${config.filename || 'prompts'}_${ts}.txt`);
+    saveAs(new Blob([scraped.join('\n')], { type: 'text/plain;charset=utf-8' }), exportName('txt'));
     toast.success(t('gen_download'));
+  };
+  const downloadCsv = () => {
+    if (!scraped?.length) return;
+    const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+    const rows = [['index', 'prompt'], ...scraped.filter((p) => p.trim()).map((p, i) => [i + 1, p])];
+    const csv = '﻿' + rows.map((r) => r.map(esc).join(',')).join('\r\n');
+    saveAs(new Blob([csv], { type: 'text/csv;charset=utf-8' }), exportName('csv'));
+    toast.success('CSV');
   };
 
   const copyAll = () => {
@@ -184,6 +208,9 @@ export default function GeneratePage() {
                   <span className="num">{progress.percentage ? Math.round(progress.percentage) : 0}%</span>
                 </div>
                 <div className="progress"><span style={{ width: `${progress.percentage}%` }} /></div>
+                <button className="btn btn-ghost btn-block" onClick={stop} style={{ color: 'var(--error)' }}>
+                  <Square /> {t('gen_stop')}
+                </button>
               </div>
             ) : (
               <button className="btn btn-primary btn-lg btn-block" onClick={run}>
@@ -203,7 +230,10 @@ export default function GeneratePage() {
                     {copied ? <Check /> : <Copy />}
                   </button>
                   <button className="btn btn-ghost" style={{ padding: '7px 12px', fontSize: 12.5 }} onClick={download}>
-                    <Download /> {t('gen_download')}
+                    <FileText /> TXT
+                  </button>
+                  <button className="btn btn-ghost" style={{ padding: '7px 12px', fontSize: 12.5 }} onClick={downloadCsv}>
+                    <Table /> CSV
                   </button>
                 </div>
               )}
