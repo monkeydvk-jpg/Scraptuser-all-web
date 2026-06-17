@@ -264,6 +264,9 @@ export const STR: Record<string, Entry> = {
   an_top: { vi: 'Asset nổi bật', en: 'Top performing assets' },
   an_topdl: { vi: 'Top download', en: 'Top downloads' },
   an_topdl_sub: { vi: 'xếp theo lượt tải', en: 'ranked by downloads' },
+  an_sort: { vi: 'Đổi cách sắp xếp', en: 'Change sort' },
+  an_sort_dl: { vi: 'Lượt tải', en: 'Downloads' },
+  an_sort_title: { vi: 'Tên A–Z', en: 'Title A–Z' },
   st_loading: { vi: 'Đang phân tích…', en: 'Analyzing…' },
 
   // Keyword Insights (redesign)

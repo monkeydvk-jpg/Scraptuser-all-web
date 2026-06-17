@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { Search, Users, BarChart3, Layers, Download, Gauge, Sparkles, RefreshCw, AlertTriangle, ExternalLink } from 'lucide-react';
+import { saveAs } from 'file-saver';
+import { Search, Users, BarChart3, Layers, Download, Gauge, Sparkles, RefreshCw, AlertTriangle, ExternalLink, ArrowUpDown, FileText, Table } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -22,6 +23,7 @@ export default function AnalyticsPage() {
   const [progress, setProgress] = useState(0);
   const [scanned, setScanned] = useState(0);
   const [topN, setTopN] = useState<100 | 500>(100);
+  const [sortKey, setSortKey] = useState<'dl' | 'title'>('dl');
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastQ = useRef('');
 
@@ -76,6 +78,34 @@ export default function AnalyticsPage() {
     .sort((a, b) => b[1] - a[1])
     .map(([id, v]) => ({ label: contentMeta(id) ? t(contentMeta(id)!.key) : id, value: Math.round((v / totalDl) * 100), color: contentMeta(id)?.color || theme.colors.accent }))
     .filter((d) => d.value > 0);
+
+  const topList = (() => {
+    const base = data?.topDownloaded ?? [];
+    const sorted = sortKey === 'title'
+      ? [...base].sort((a, b) => a.title.localeCompare(b.title))
+      : [...base].sort((a, b) => b.nb_downloads - a.nb_downloads);
+    return sorted.slice(0, topN);
+  })();
+
+  const exportName = (ext: string) => {
+    const q = (data?.meta?.query || 'export').replace(/[^a-z0-9_-]+/gi, '_');
+    return `top${topN}_${q}.${ext}`;
+  };
+  const exportTxt = () => {
+    if (!topList.length) return;
+    const body = topList.map((a, i) => `${i + 1}. ${a.title}  —  ${a.nb_downloads} downloads  —  https://stock.adobe.com/${a.id}`).join('\n');
+    saveAs(new Blob([body], { type: 'text/plain;charset=utf-8' }), exportName('txt'));
+  };
+  const exportCsv = () => {
+    if (!topList.length) return;
+    const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+    const rows = [
+      ['rank', 'id', 'title', 'downloads', 'url'],
+      ...topList.map((a, i) => [i + 1, a.id, a.title, a.nb_downloads, `https://stock.adobe.com/${a.id}`]),
+    ];
+    const csv = '﻿' + rows.map((r) => r.map(esc).join(',')).join('\r\n');
+    saveAs(new Blob([csv], { type: 'text/csv;charset=utf-8' }), exportName('csv'));
+  };
 
   return (
     <main className="app">
@@ -212,7 +242,7 @@ export default function AnalyticsPage() {
                 <span className="icon-badge tint-success"><Download /></span>
                 <span className="ttl">{t('an_topdl')}</span>
                 <span className="sub">{t('an_topdl_sub')}</span>
-                <div className="row" style={{ marginLeft: 'auto', gap: 6 }}>
+                <div className="row wrap" style={{ marginLeft: 'auto', gap: 6 }}>
                   {([100, 500] as const).map((n) => (
                     <button
                       key={n}
@@ -223,13 +253,26 @@ export default function AnalyticsPage() {
                       Top {n}
                     </button>
                   ))}
+                  <button
+                    className="chip"
+                    onClick={() => setSortKey((k) => (k === 'dl' ? 'title' : 'dl'))}
+                    title={t('an_sort')}
+                  >
+                    <ArrowUpDown style={{ width: 13, height: 13 }} /> {sortKey === 'dl' ? t('an_sort_dl') : t('an_sort_title')}
+                  </button>
+                  <button className="btn btn-ghost" style={{ padding: '7px 12px', fontSize: 12.5 }} onClick={exportTxt} disabled={!topList.length}>
+                    <FileText style={{ width: 14, height: 14 }} /> TXT
+                  </button>
+                  <button className="btn btn-ghost" style={{ padding: '7px 12px', fontSize: 12.5 }} onClick={exportCsv} disabled={!topList.length}>
+                    <Table style={{ width: 14, height: 14 }} /> CSV
+                  </button>
                 </div>
               </div>
-              {(data.topDownloaded?.length ?? 0) === 0 ? (
+              {topList.length === 0 ? (
                 <p style={{ color: 'var(--label-fg)' }}>—</p>
               ) : (
                 <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(168px, 1fr))', gap: 14 }}>
-                  {(data.topDownloaded ?? []).slice(0, topN).map((a, i) => (
+                  {topList.map((a, i) => (
                     <a key={a.id} href={`https://stock.adobe.com/${a.id}`} target="_blank" rel="noreferrer" className="stack" style={{ gap: 9, textDecoration: 'none', color: 'inherit' }}>
                       <div className="thumb lift" style={{ aspectRatio: '4 / 3' }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
