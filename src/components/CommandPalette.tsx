@@ -46,7 +46,7 @@ export function CommandPalette() {
 
   const items = useMemo<Cmd[]>(() => {
     const nav: Cmd[] = [
-      { id: 'g', group: t('cmd_nav'), label: t('nav_generate'), sub: '/', icon: Zap, run: () => router.push('/') },
+      { id: 'g', group: t('cmd_nav'), label: t('nav_generate'), sub: '/generate', icon: Zap, run: () => router.push('/generate') },
       { id: 'a', group: t('cmd_nav'), label: t('nav_analytics'), sub: '/analytics', icon: BarChart3, run: () => router.push('/analytics') },
       { id: 'k', group: t('cmd_nav'), label: t('nav_keywords'), sub: '/keywords', icon: Compass, run: () => router.push('/keywords') },
       { id: 't', group: t('cmd_nav'), label: t('nav_trends'), sub: '/trends', icon: TrendingUp, run: () => router.push('/trends') },

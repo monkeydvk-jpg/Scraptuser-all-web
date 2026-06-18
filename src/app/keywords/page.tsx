@@ -103,7 +103,7 @@ export default function KeywordsPage() {
 
   const generateFromKeyword = (kw: string) => {
     updateConfig({ url: `https://stock.adobe.com/search?k=${encodeURIComponent(kw)}` });
-    router.push('/');
+    router.push('/generate');
   };
 
   return (

@@ -10,7 +10,7 @@ import { THEMES } from '@/types';
 import { t as translate, type Lang } from '@/lib/i18n';
 
 const NAV: { href: string; key: string; icon: LucideIcon }[] = [
-  { href: '/', key: 'nav_generate', icon: Zap },
+  { href: '/generate', key: 'nav_generate', icon: Zap },
   { href: '/analytics', key: 'nav_analytics', icon: BarChart3 },
   { href: '/keywords', key: 'nav_keywords', icon: Compass },
   { href: '/trends', key: 'nav_trends', icon: TrendingUp },
