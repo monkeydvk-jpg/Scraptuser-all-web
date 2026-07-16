@@ -22,6 +22,12 @@
 
 ### Task 1: Adobe Stock client — `fetchAssetById`
 
+> **Execution correction (2026-07-16):** live testing showed
+> `search_parameters[filters][media_id]` is silently ignored by the SearchBar
+> endpoint. The shipped implementation queries `search_parameters[words]=<id>`
+> instead (numeric queries resolve to the exact asset) and verifies the
+> returned `file.id` equals the requested id. The spec was updated to match.
+
 **Files:**
 - Modify: `src/lib/adobeStock.ts` (refactor `fetchBatch`, add `fetchAssetById`)
 - Modify: `src/lib/adobeStats.ts` (export `USER_AGENT`)

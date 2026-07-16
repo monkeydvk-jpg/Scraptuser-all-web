@@ -27,9 +27,12 @@ contributor feature is untouched.
 Add `fetchAssetById(assetId, { deadline?, headers? })`:
 
 - Uses the existing `STOCK_API_BASE` search endpoint with
-  `search_parameters[filters][media_id]=<id>`, `limit=1`, and the existing
+  `search_parameters[words]=<id>`, `limit=1`, and the existing
   `DEFAULT_COLUMNS` (id, title, nb_downloads, creation_date, content_type,
-  thumbnail_240_url, …).
+  thumbnail_240_url, …). Numeric queries resolve to the exact asset — the same
+  trick the Adobe search bar uses. (`filters[media_id]` was the original plan
+  but is silently ignored by this SearchBar endpoint — verified live
+  2026-07-16 — so the returned `id` is double-checked against the request.)
 - Returns the single `RawStockFile` or throws when the API errors or returns no
   file (invalid/removed asset id) — mirroring `fetchAdobeStats`'s fail-loud rule
   so the cron records a failure instead of storing a bogus 0.
