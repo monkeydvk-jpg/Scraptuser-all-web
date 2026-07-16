@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Zap, BarChart3, Compass, TrendingUp, LineChart, Palette, Search, Check } from 'lucide-react';
+import { Zap, BarChart3, Compass, TrendingUp, Eye, LineChart, Palette, Search, Check, Image as ImageIcon } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { THEMES } from '@/types';
@@ -14,6 +14,8 @@ const NAV: { href: string; key: string; icon: LucideIcon }[] = [
   { href: '/analytics', key: 'nav_analytics', icon: BarChart3 },
   { href: '/keywords', key: 'nav_keywords', icon: Compass },
   { href: '/trends', key: 'nav_trends', icon: TrendingUp },
+  { href: '/watchlist', key: 'nav_watchlist', icon: Eye },
+  { href: '/assets', key: 'nav_assets', icon: ImageIcon },
 ];
 
 function ThemePicker() {

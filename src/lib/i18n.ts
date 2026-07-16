@@ -358,6 +358,82 @@ export const STR: Record<string, Entry> = {
   lp_final_title: { vi: 'Sẵn sàng tạo prompt nhanh hơn?', en: 'Ready to build prompts faster?' },
   lp_final_sub: { vi: 'Mở app và bắt đầu ngay — miễn phí, không cần đăng ký.', en: 'Open the app and start now — free, no sign-up.' },
   lp_footer_tools: { vi: 'Công cụ', en: 'Tools' },
+
+  // ── Watchlist + growth history ──
+  nav_watchlist: { vi: 'Theo dõi', en: 'Watchlist' },
+  wl_title: { vi: 'Watchlist tăng trưởng', en: 'Growth watchlist' },
+  wl_sub: {
+    vi: 'Theo dõi asset & download của contributor Adobe Stock, cập nhật mỗi ngày. Tăng trưởng = chênh lệch giữa các bản chụp.',
+    en: "Track Adobe Stock contributors' assets & downloads, refreshed daily. Growth = the delta between snapshots.",
+  },
+  wl_add_title: { vi: 'Thêm contributor', en: 'Add a contributor' },
+  wl_add_id_ph: { vi: 'creator_id (vd 211716350)', en: 'creator_id (e.g. 211716350)' },
+  wl_add_name_ph: { vi: 'Tên gợi nhớ (tuỳ chọn)', en: 'Memo name (optional)' },
+  wl_add_btn: { vi: 'Theo dõi', en: 'Add' },
+  wl_col_contributor: { vi: 'Contributor', en: 'Contributor' },
+  wl_col_assets: { vi: 'Assets', en: 'Assets' },
+  wl_col_downloads: { vi: 'Downloads', en: 'Downloads' },
+  wl_col_today: { vi: 'Hôm nay', en: 'Today' },
+  wl_col_week: { vi: '7 ngày', en: '7 days' },
+  wl_remove: { vi: 'Bỏ theo dõi', en: 'Unfollow' },
+  wl_snapshot: { vi: 'snapshot', en: 'snapshot' },
+  wl_added_on: { vi: 'Thêm ngày', en: 'Added' },
+  wl_pending_title: { vi: 'Đang chờ snapshot đầu tiên', en: 'Awaiting first snapshot' },
+  wl_pending_desc: {
+    vi: 'Đã thêm nhưng chưa có dữ liệu. Cron 07:00 (VN) mỗi ngày sẽ chụp lần đầu — hoặc gọi tay endpoint cron.',
+    en: 'Added but no data yet. The daily 07:00 (VN) cron takes the first snapshot — or trigger the cron manually.',
+  },
+  wl_empty_title: { vi: 'Chưa theo dõi ai', en: 'Nothing on your watchlist' },
+  wl_empty_desc: {
+    vi: 'Thêm creator_id của một contributor Adobe Stock để bắt đầu theo dõi tăng trưởng.',
+    en: "Add an Adobe Stock contributor's creator_id to start tracking growth.",
+  },
+  wl_error_title: { vi: 'Không tải được watchlist', en: 'Could not load the watchlist' },
+  wl_error_config: {
+    vi: 'Supabase chưa cấu hình. Thêm NEXT_PUBLIC_SUPABASE_URL và SUPABASE_SERVICE_ROLE_KEY vào biến môi trường.',
+    en: 'Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to the environment.',
+  },
+  wl_error_generic: {
+    vi: 'Lỗi khi truy vấn dữ liệu. Bạn đã chạy migration SQL trên Supabase chưa?',
+    en: 'Error querying data. Did you run the SQL migration on Supabase?',
+  },
+
+  // ── Asset watchlist ──
+  nav_assets: { vi: 'Asset', en: 'Assets' },
+  as_title: { vi: 'Theo dõi Asset ID', en: 'Asset tracking' },
+  as_sub: {
+    vi: 'Theo dõi lượt tải của từng asset Adobe Stock theo Asset ID, cập nhật mỗi ngày. Tăng trưởng = chênh lệch giữa các bản chụp.',
+    en: 'Track downloads of individual Adobe Stock assets by Asset ID, refreshed daily. Growth = the delta between snapshots.',
+  },
+  as_add_title: { vi: 'Thêm asset', en: 'Add an asset' },
+  as_add_id_ph: { vi: 'Asset ID (vd 123456789)', en: 'Asset ID (e.g. 123456789)' },
+  as_add_name_ph: { vi: 'Tên gợi nhớ (tuỳ chọn)', en: 'Memo name (optional)' },
+  as_add_btn: { vi: 'Theo dõi', en: 'Add' },
+  as_col_asset: { vi: 'Asset', en: 'Asset' },
+  as_col_downloads: { vi: 'Downloads', en: 'Downloads' },
+  as_col_today: { vi: 'Hôm nay', en: 'Today' },
+  as_col_week: { vi: '7 ngày', en: '7 days' },
+  as_remove: { vi: 'Bỏ theo dõi', en: 'Untrack' },
+  as_snapshot: { vi: 'snapshot', en: 'snapshot' },
+  as_pending_title: { vi: 'Đang chờ snapshot đầu tiên', en: 'Awaiting first snapshot' },
+  as_pending_desc: {
+    vi: 'Đã thêm nhưng chưa có dữ liệu. Cron 07:00 (VN) mỗi ngày sẽ chụp lần đầu — hoặc gọi tay endpoint cron.',
+    en: 'Added but no data yet. The daily 07:00 (VN) cron takes the first snapshot — or trigger the cron manually.',
+  },
+  as_empty_title: { vi: 'Chưa theo dõi asset nào', en: 'No assets tracked yet' },
+  as_empty_desc: {
+    vi: 'Nhập Asset ID của một asset Adobe Stock để bắt đầu theo dõi lượt tải.',
+    en: 'Enter an Adobe Stock Asset ID to start tracking its downloads.',
+  },
+  as_error_title: { vi: 'Không tải được danh sách asset', en: 'Could not load tracked assets' },
+  as_error_config: {
+    vi: 'Supabase chưa cấu hình. Thêm NEXT_PUBLIC_SUPABASE_URL và SUPABASE_SERVICE_ROLE_KEY vào biến môi trường.',
+    en: 'Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to the environment.',
+  },
+  as_error_generic: {
+    vi: 'Lỗi khi truy vấn dữ liệu. Bạn đã chạy migration SQL 20260716_asset_watchlist trên Supabase chưa?',
+    en: 'Error querying data. Did you run the 20260716_asset_watchlist SQL migration on Supabase?',
+  },
 };
 
 export function t(lang: Lang, key: string): string {

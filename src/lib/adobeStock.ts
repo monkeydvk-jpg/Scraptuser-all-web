@@ -63,6 +63,13 @@ interface FetchParams {
   contentFilter?: string;
   limit: number;
   offset: number;
+  /** Extra request headers merged over the defaults (e.g. a User-Agent). */
+  headers?: Record<string, string>;
+  /**
+   * ms-epoch cutoff. When set, the in-flight request is aborted if it hasn't
+   * completed by then — so a hung response can't outlast a serverless budget.
+   */
+  deadline?: number;
 }
 
 function buildApiUrl({ mode, query, contentFilter = 'all', limit, offset }: FetchParams): string {
@@ -91,14 +98,43 @@ function buildApiUrl({ mode, query, contentFilter = 'all', limit, offset }: Fetc
   return url.toString();
 }
 
+/** Deadline-aware GET against the Stock API. Shared by fetchBatch/fetchAssetById. */
+async function fetchStockUrl(
+  url: string,
+  { headers, deadline }: { headers?: Record<string, string>; deadline?: number },
+): Promise<StockApiResponse> {
+  const merged = headers ? { ...STOCK_HEADERS, ...headers } : STOCK_HEADERS;
+
+  // Bound the request by the caller's deadline. Without a signal, an in-flight
+  // fetch has no timeout (Node's global fetch defaults to minutes), so a single
+  // stalled response could outlast a serverless maxDuration.
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  if (deadline != null) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) {
+      const err = new Error('Adobe Stock fetch aborted: deadline reached before request');
+      err.name = 'AbortError';
+      throw err;
+    }
+    timer = setTimeout(() => controller.abort(), remaining);
+  }
+
+  try {
+    const res = await fetch(url, { headers: merged, cache: 'no-store', signal: controller.signal });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Adobe Stock API ${res.status}: ${text.slice(0, 200)}`);
+    }
+    return res.json();
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 /** Fetch a single batch (≤ 64 files) from the Adobe Stock API. */
 export async function fetchBatch(params: FetchParams): Promise<StockApiResponse> {
-  const res = await fetch(buildApiUrl(params), { headers: STOCK_HEADERS, cache: 'no-store' });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Adobe Stock API ${res.status}: ${text.slice(0, 200)}`);
-  }
-  return res.json();
+  return fetchStockUrl(buildApiUrl(params), { headers: params.headers, deadline: params.deadline });
 }
 
 export interface FetchAssetsResult {
@@ -113,6 +149,8 @@ export interface FetchAssetsParams {
   maxAssets: number;
   /** Optional cutoff (ms epoch) after which fetching stops early and returns what it has. */
   deadline?: number;
+  /** Extra request headers merged over the defaults (e.g. a User-Agent). */
+  headers?: Record<string, string>;
 }
 
 /**
@@ -125,6 +163,7 @@ export async function fetchAssets({
   contentFilter = 'all',
   maxAssets,
   deadline,
+  headers,
 }: FetchAssetsParams): Promise<FetchAssetsResult> {
   const cappedMax = Math.min(maxAssets, 2000);
   const files: RawStockFile[] = [];
@@ -138,7 +177,15 @@ export async function fetchAssets({
     const limit = Math.min(ITEMS_PER_BATCH, cappedMax - files.length);
     if (limit <= 0) break;
 
-    const data = await fetchBatch({ mode, query, contentFilter, limit, offset });
+    let data: StockApiResponse;
+    try {
+      data = await fetchBatch({ mode, query, contentFilter, limit, offset, headers, deadline });
+    } catch (err) {
+      // Deadline hit mid-request → stop and return what we have, matching the
+      // between-batch deadline break above. Any other error still propagates.
+      if ((err as { name?: string })?.name === 'AbortError') break;
+      throw err;
+    }
     nbResults = data.nb_results ?? nbResults;
 
     if (!data.files || data.files.length === 0) break;
@@ -159,4 +206,42 @@ export async function fetchAssets({
 export async function searchCount(keyword: string): Promise<number> {
   const data = await fetchBatch({ mode: 'topic', query: keyword, limit: 1, offset: 0 });
   return data.nb_results ?? 0;
+}
+
+/**
+ * Fetch a single asset by its Adobe Stock media id (the number in the asset URL).
+ *
+ * Queries the id via `search_parameters[words]` — the same trick the Adobe
+ * search bar uses for pasted ids, which resolves numeric queries to the exact
+ * asset. (`filters[media_id]` is silently IGNORED by this SearchBar endpoint —
+ * verified live 2026-07-16 — so the returned id is double-checked here.)
+ *
+ * @throws Error when the id is not numeric, the API errors, or the exact asset
+ *   is not returned (invalid/removed id) — fail loud so callers never store a
+ *   bogus 0.
+ */
+export async function fetchAssetById(
+  assetId: string,
+  options: { deadline?: number; headers?: Record<string, string> } = {},
+): Promise<RawStockFile> {
+  const id = assetId.trim();
+  if (!/^\d+$/.test(id)) {
+    throw new Error(`Asset id không hợp lệ: "${assetId}" (phải là dãy số)`);
+  }
+
+  const url = new URL(STOCK_API_BASE);
+  url.searchParams.set('locale', 'en_US');
+  url.searchParams.set('search_parameters[limit]', '1');
+  url.searchParams.set('search_parameters[offset]', '0');
+  url.searchParams.set('search_parameters[words]', id);
+  DEFAULT_COLUMNS.forEach((col, i) => {
+    url.searchParams.set(`result_columns[${i}]`, col);
+  });
+
+  const data = await fetchStockUrl(url.toString(), options);
+  const file = data.files?.[0];
+  if (!file || file.id !== Number(id)) {
+    throw new Error(`Không tìm thấy asset với id "${id}" (sai id hoặc asset đã bị gỡ?)`);
+  }
+  return file;
 }

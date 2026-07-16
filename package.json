@@ -11,29 +11,30 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.0",
+    "autoprefixer": "10.4.20",
+    "axios": "1.7.2",
+    "cheerio": "1.0.0-rc.12",
+    "class-variance-authority": "0.7.0",
+    "clsx": "2.1.1",
+    "date-fns": "3.6.0",
+    "file-saver": "2.0.5",
+    "framer-motion": "11.3.19",
+    "lucide-react": "0.424.0",
     "next": "14.2.5",
+    "postcss": "8.4.41",
+    "puppeteer-core": "23.9.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "typescript": "5.5.4",
-    "tailwindcss": "3.4.7",
-    "autoprefixer": "10.4.20",
-    "postcss": "8.4.41",
-    "lucide-react": "0.424.0",
-    "framer-motion": "11.3.19",
-    "axios": "1.7.2",
-    "puppeteer-core": "23.9.0",
-    "cheerio": "1.0.0-rc.12",
-    "file-saver": "2.0.5",
     "react-hot-toast": "2.4.1",
-    "zustand": "4.5.4",
-    "date-fns": "3.6.0",
-    "clsx": "2.1.1",
-    "class-variance-authority": "0.7.0"
+    "tailwindcss": "3.4.7",
+    "typescript": "5.5.4",
+    "zustand": "4.5.4"
   },
   "devDependencies": {
+    "@types/file-saver": "2.0.7",
     "@types/node": "22.2.0",
     "@types/react": "18.3.3",
-    "@types/react-dom": "18.3.0",
-    "@types/file-saver": "2.0.7"
+    "@types/react-dom": "18.3.0"
   }
 }
