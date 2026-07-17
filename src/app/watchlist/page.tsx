@@ -1,13 +1,17 @@
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { redirect } from 'next/navigation';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
-import { DOGFOOD_USER_ID } from '@/lib/watchlist';
+import { getUser } from '@/lib/supabase/serverAuth';
 import type { WatchlistGrowthRow, PendingContributor } from '@/lib/watchlist';
 import { WatchlistClient } from './WatchlistClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function WatchlistPage() {
+  const user = await getUser();
+  if (!user) redirect('/login?next=/watchlist');
+
   let rows: WatchlistGrowthRow[] = [];
   let pending: PendingContributor[] = [];
   let errorMsg: string | null = null;
@@ -18,11 +22,11 @@ export default async function WatchlistPage() {
     try {
       const supabase = getSupabaseAdmin();
       const [growthRes, watchRes] = await Promise.all([
-        supabase.rpc('get_watchlist_growth', { p_user_id: DOGFOOD_USER_ID }),
+        supabase.rpc('get_watchlist_growth', { p_user_id: user.id }),
         supabase
           .from('watchlist')
           .select('contributor_id, contributor_name, created_at')
-          .eq('user_id', DOGFOOD_USER_ID)
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false }),
       ]);
 

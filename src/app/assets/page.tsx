@@ -1,13 +1,17 @@
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { redirect } from 'next/navigation';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
-import { DOGFOOD_USER_ID } from '@/lib/watchlist';
+import { getUser } from '@/lib/supabase/serverAuth';
 import type { AssetGrowthRow, PendingAsset } from '@/lib/assetWatchlist';
 import { AssetsClient } from './AssetsClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AssetsPage() {
+  const user = await getUser();
+  if (!user) redirect('/login?next=/assets');
+
   let rows: AssetGrowthRow[] = [];
   let pending: PendingAsset[] = [];
   let errorMsg: string | null = null;
@@ -18,11 +22,11 @@ export default async function AssetsPage() {
     try {
       const supabase = getSupabaseAdmin();
       const [growthRes, watchRes] = await Promise.all([
-        supabase.rpc('get_asset_watchlist_growth', { p_user_id: DOGFOOD_USER_ID }),
+        supabase.rpc('get_asset_watchlist_growth', { p_user_id: user.id }),
         supabase
           .from('asset_watchlist')
           .select('asset_id, asset_title, memo_name, thumbnail_url, created_at')
-          .eq('user_id', DOGFOOD_USER_ID)
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false }),
       ]);
 

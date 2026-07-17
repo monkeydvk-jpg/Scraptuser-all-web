@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Zap, BarChart3, Compass, TrendingUp, Eye, LineChart, Palette, Search, Check, Image as ImageIcon } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+import { AccountMenu } from '@/components/AccountMenu';
 import { THEMES } from '@/types';
 import { t as translate, type Lang } from '@/lib/i18n';
 
@@ -116,9 +117,7 @@ export function Header() {
               ))}
             </div>
             <ThemePicker />
-            <div className="avatar" title="Studio Aurora" aria-label="Account">
-              SA
-            </div>
+            <AccountMenu />
           </div>
         </div>
       </header>

@@ -434,6 +434,26 @@ export const STR: Record<string, Entry> = {
     vi: 'Lỗi khi truy vấn dữ liệu. Bạn đã chạy migration SQL 20260716_asset_watchlist trên Supabase chưa?',
     en: 'Error querying data. Did you run the 20260716_asset_watchlist SQL migration on Supabase?',
   },
+
+  // ── Auth / accounts ──
+  login_title: { vi: 'Tài khoản', en: 'Account' },
+  login_sub: {
+    vi: 'Đăng nhập để có Watchlist và danh sách Asset của riêng bạn.',
+    en: 'Sign in to get your own Watchlist and tracked Assets.',
+  },
+  login_tab_signin: { vi: 'Đăng nhập', en: 'Sign in' },
+  login_tab_signup: { vi: 'Đăng ký', en: 'Sign up' },
+  login_email_ph: { vi: 'Email', en: 'Email' },
+  login_password_ph: { vi: 'Mật khẩu (≥ 6 ký tự)', en: 'Password (≥ 6 characters)' },
+  login_btn_signin: { vi: 'Đăng nhập', en: 'Sign in' },
+  login_btn_signup: { vi: 'Tạo tài khoản', en: 'Create account' },
+  login_err_invalid: { vi: 'Email hoặc mật khẩu không đúng.', en: 'Wrong email or password.' },
+  login_err_exists: { vi: 'Email này đã có tài khoản — hãy đăng nhập.', en: 'This email already has an account — sign in instead.' },
+  login_err_weak_password: { vi: 'Mật khẩu phải có ít nhất 6 ký tự.', en: 'Password must be at least 6 characters.' },
+  login_err_generic: { vi: 'Có lỗi xảy ra, thử lại sau.', en: 'Something went wrong, try again.' },
+  acc_signin: { vi: 'Đăng nhập', en: 'Sign in' },
+  acc_signout: { vi: 'Đăng xuất', en: 'Sign out' },
+  acc_signed_in_as: { vi: 'Đang đăng nhập', en: 'Signed in as' },
 };
 
 export function t(lang: Lang, key: string): string {
