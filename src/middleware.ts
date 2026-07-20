@@ -28,7 +28,8 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isProtected = path.startsWith('/watchlist') || path.startsWith('/assets');
+  const isProtected =
+    path.startsWith('/watchlist') || path.startsWith('/assets') || path.startsWith('/admin');
 
   if (!user && isProtected) {
     const to = request.nextUrl.clone();
@@ -46,5 +47,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/watchlist/:path*', '/assets/:path*', '/login'],
+  matcher: ['/watchlist/:path*', '/assets/:path*', '/admin/:path*', '/login'],
 };

@@ -454,6 +454,29 @@ export const STR: Record<string, Entry> = {
   acc_signin: { vi: 'Đăng nhập', en: 'Sign in' },
   acc_signout: { vi: 'Đăng xuất', en: 'Sign out' },
   acc_signed_in_as: { vi: 'Đang đăng nhập', en: 'Signed in as' },
+  acc_admin: { vi: 'Quản trị', en: 'Admin' },
+
+  // ── Admin dashboard ──
+  adm_title: { vi: 'Quản trị người dùng', en: 'User administration' },
+  adm_sub: {
+    vi: 'Danh sách tài khoản đã đăng ký và mức độ sử dụng. Chỉ admin (ADMIN_EMAILS) xem được trang này.',
+    en: 'Registered accounts and their usage. Only admins (ADMIN_EMAILS) can see this page.',
+  },
+  adm_total_users: { vi: 'Tổng tài khoản', en: 'Total accounts' },
+  adm_total_contribs: { vi: 'Lượt theo dõi contributor', en: 'Contributor follows' },
+  adm_total_assets: { vi: 'Lượt theo dõi asset', en: 'Asset follows' },
+  adm_col_email: { vi: 'Email', en: 'Email' },
+  adm_col_created: { vi: 'Ngày đăng ký', en: 'Signed up' },
+  adm_col_last_signin: { vi: 'Đăng nhập cuối', en: 'Last sign-in' },
+  adm_col_contribs: { vi: 'Contributors', en: 'Contributors' },
+  adm_col_assets: { vi: 'Assets', en: 'Assets' },
+  adm_you: { vi: 'bạn', en: 'you' },
+  adm_never: { vi: 'chưa từng', en: 'never' },
+  adm_error_title: { vi: 'Không tải được danh sách user', en: 'Could not load the user list' },
+  adm_note_limit: {
+    vi: 'Hiển thị tối đa 50 tài khoản đầu tiên.',
+    en: 'Showing at most the first 50 accounts.',
+  },
 };
 
 export function t(lang: Lang, key: string): string {

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { LogIn, LogOut } from 'lucide-react';
+import { LogIn, LogOut, Shield } from 'lucide-react';
 import { useT } from '@/lib/useT';
 import { signOut } from '@/app/login/actions';
 
@@ -13,6 +13,7 @@ import { signOut } from '@/app/login/actions';
 export function AccountMenu() {
   const t = useT();
   const [email, setEmail] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -21,7 +22,10 @@ export function AccountMenu() {
     fetch('/api/auth/me', { cache: 'no-store' })
       .then((r) => r.json())
       .then((d) => {
-        if (alive) setEmail(typeof d.email === 'string' ? d.email : null);
+        if (alive) {
+          setEmail(typeof d.email === 'string' ? d.email : null);
+          setIsAdmin(d.isAdmin === true);
+        }
       })
       .catch(() => {});
     return () => {
@@ -60,6 +64,17 @@ export function AccountMenu() {
         <div className="tp-menu" role="menu" style={{ minWidth: 220 }}>
           <div className="tp-title">{t('acc_signed_in_as')}</div>
           <div style={{ padding: '4px 10px 8px', fontSize: 12.5, wordBreak: 'break-all' }}>{email}</div>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="tp-item"
+              style={{ textDecoration: 'none', color: 'inherit' }}
+              onClick={() => setOpen(false)}
+            >
+              <Shield style={{ width: 14, height: 14 }} />
+              <span className="tp-name">{t('acc_admin')}</span>
+            </Link>
+          )}
           <form action={signOut}>
             <button
               type="submit"
