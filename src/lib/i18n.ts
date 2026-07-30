@@ -222,6 +222,9 @@ export const STR: Record<string, Entry> = {
   footer_tagline: { vi: '✨ Stocklytics — bộ công cụ Adobe Stock', en: '✨ Stocklytics — Adobe Stock suite' },
   footer_sub: { vi: 'Giao diện web hiện đại, xử lý thời gian thực', en: 'Modern web interface with real-time processing' },
   footer_hint: { vi: 'Nhấn ⌘K để mở bảng lệnh', en: 'Press ⌘K to open command palette' },
+  footer_visits_total: { vi: 'lượt truy cập', en: 'visits' },
+  footer_visits_today: { vi: 'hôm nay', en: 'today' },
+  footer_visits_online: { vi: 'đang online', en: 'online' },
 
   // Command palette
   cmd_placeholder: { vi: 'Tìm lệnh hoặc trang…', en: 'Search commands or pages…' },

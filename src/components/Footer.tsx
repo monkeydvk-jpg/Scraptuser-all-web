@@ -3,6 +3,7 @@
 import { useAppStore } from '@/lib/store';
 import { useT } from '@/lib/useT';
 import { LineChart, Github } from 'lucide-react';
+import { VisitorCounter } from '@/components/VisitorCounter';
 
 export function Footer() {
   const { theme } = useAppStore();
@@ -33,6 +34,7 @@ export function Footer() {
           </div>
 
           <div className="flex items-center gap-3 text-sm">
+            <VisitorCounter />
             <span
               className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs"
               style={{ color: theme.colors.labelFg, border: `1px solid ${theme.colors.highlight}26` }}
