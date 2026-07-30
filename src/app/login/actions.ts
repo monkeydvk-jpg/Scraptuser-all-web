@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { createAuthClient } from '@/lib/supabase/serverAuth';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
+import { logEvent } from '@/lib/accessLog';
 
 /** Inline form errors carry an i18n KEY, rendered by LoginClient via t(). */
 export interface AuthFormState {
@@ -23,8 +24,10 @@ export async function signIn(_prev: AuthFormState, formData: FormData): Promise<
   if (!EMAIL_RE.test(email) || !password) return { error: 'login_err_invalid' };
 
   const supabase = createAuthClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: 'login_err_invalid' };
+
+  await logEvent({ eventType: 'login', userId: data.user?.id ?? null });
 
   redirect(safeNext(formData.get('next')));
 }
@@ -47,14 +50,19 @@ export async function signUp(_prev: AuthFormState, formData: FormData): Promise<
   }
 
   const supabase = createAuthClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: 'login_err_generic' };
+
+  await logEvent({ eventType: 'signup', userId: data.user?.id ?? null });
 
   redirect(safeNext(formData.get('next')));
 }
 
 export async function signOut(): Promise<void> {
   const supabase = createAuthClient();
+  // Log BEFORE signing out: afterwards the session cookie is gone, userId would
+  // resolve to null, and the row would lose the one fact it exists to record.
+  await logEvent({ eventType: 'logout' });
   await supabase.auth.signOut();
   redirect('/');
 }

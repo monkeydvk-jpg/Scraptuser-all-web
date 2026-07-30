@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { logEvent } from '@/lib/accessLog';
 
 const ITEMS_PER_PAGE = 64; // Adobe Stock API max per request
 const STOCK_API_BASE = 'https://stock.adobe.io/Rest/Media/1/Search/Files';
@@ -230,6 +231,12 @@ export async function POST(request: NextRequest) {
     });
 
     const processingTime = Date.now() - startTime;
+
+    await logEvent({
+      eventType: 'scrape',
+      path: '/api/scrape',
+      meta: { url, startPage, endPage },
+    });
 
     return NextResponse.json({
       success: true,

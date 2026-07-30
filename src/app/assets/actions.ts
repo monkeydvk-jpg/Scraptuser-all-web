@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { getUser } from '@/lib/supabase/serverAuth';
 import { fetchAssetById } from '@/lib/adobeStock';
 import { USER_AGENT } from '@/lib/adobeStats';
+import { logEvent } from '@/lib/accessLog';
 
 /**
  * Add (or re-label) an asset on the signed-in user's asset watchlist.
@@ -37,6 +38,8 @@ export async function addAsset(formData: FormData): Promise<void> {
   );
   if (error) throw new Error(`Không thêm được asset: ${error.message}`);
 
+  await logEvent({ eventType: 'asset_add', userId: user.id, meta: { asset_id: assetId } });
+
   revalidatePath('/assets');
 }
 
@@ -55,6 +58,8 @@ export async function removeAsset(formData: FormData): Promise<void> {
     .eq('user_id', user.id)
     .eq('asset_id', assetId);
   if (error) throw new Error(`Không xoá được asset: ${error.message}`);
+
+  await logEvent({ eventType: 'asset_remove', userId: user.id, meta: { asset_id: assetId } });
 
   revalidatePath('/assets');
 }
