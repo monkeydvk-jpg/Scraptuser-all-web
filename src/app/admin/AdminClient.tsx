@@ -40,8 +40,25 @@ interface Props {
 }
 
 const fmtDate = (iso: string | null) => (iso ? iso.slice(0, 10) : null);
-/** Log rows need the time of day, which fmtDate deliberately drops. */
-const fmtDateTime = (iso: string) => iso.replace('T', ' ').slice(0, 16);
+/**
+ * Log rows need the time of day, which fmtDate deliberately drops.
+ * Rendered in Asia/Ho_Chi_Minh to match the day boundary the rest of this
+ * feature uses (access_daily rollups, purge cutoff) — the raw ISO string is
+ * UTC and would otherwise show a different day/hour than the visitor saw.
+ */
+const fmtDateTime = (iso: string) => {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(new Date(iso));
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+  return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}`;
+};
 
 function StatChip({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
@@ -165,9 +182,9 @@ export function AdminClient({ rows, logRows, dailyRows, selfId, errorMsg }: Prop
                       <td>{e.email ?? t('adm_log_guest')}</td>
                       <td>{e.event_type}</td>
                       <td className="mono" style={{ fontSize: 12, color: 'var(--label-fg)' }}>
-                        {e.path ?? '-'}
+                        {e.path ?? '—'}
                       </td>
-                      <td className="num" style={{ textAlign: 'right' }}>{e.country ?? '-'}</td>
+                      <td className="num" style={{ textAlign: 'right' }}>{e.country ?? '—'}</td>
                     </tr>
                   ))}
                 </tbody>

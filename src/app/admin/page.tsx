@@ -60,6 +60,30 @@ export default async function AdminPage() {
     }));
 
     const emailById = new Map(rows.map((r) => [r.id, r.email]));
+    // rows above only covers the first 50 users (listUsers perPage), but the
+    // log can reference any user_id. Without this, a real user outside that
+    // page silently renders as "Guest" instead of their email.
+    const logUserIds = Array.from(
+      new Set(
+        (logRes.data ?? [])
+          .map((e) => e.user_id as string | null)
+          .filter((id): id is string => !!id),
+      ),
+    );
+    const missingIds = logUserIds.filter((id) => !emailById.has(id));
+    if (missingIds.length > 0) {
+      const lookups = await Promise.all(
+        missingIds.map(async (id) => {
+          try {
+            const { data } = await supabase.auth.admin.getUserById(id);
+            return [id, data.user?.email ?? null] as const;
+          } catch {
+            return [id, null] as const;
+          }
+        }),
+      );
+      for (const [id, email] of lookups) emailById.set(id, email);
+    }
     logRows = (logRes.data ?? []).map((e) => ({
       id: e.id as number,
       created_at: e.created_at as string,
