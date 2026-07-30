@@ -53,7 +53,7 @@ export function VisitorCounter() {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
       <span className={chip} style={chipStyle}>
         <Eye className="w-3.5 h-3.5" />
         <strong style={{ color: theme.colors.fg }}>{fmt(stats.total)}</strong>

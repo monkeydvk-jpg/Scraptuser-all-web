@@ -33,7 +33,7 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-sm">
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 text-sm">
             <VisitorCounter />
             <span
               className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs"
