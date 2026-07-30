@@ -16,6 +16,8 @@ const PER_CONTRIBUTOR_MS = 25_000;
 const ASSET_DELAY_MS = 250;
 /** Per-asset cap; one request should never take anywhere near this. */
 const PER_ASSET_MS = 5_000;
+/** The rollup is one indexed SQL statement; if it hasn't answered by now it is stuck. */
+const ACCESS_ROLLUP_MS = 10_000;
 
 interface Failure {
   contributor_id: string;
@@ -144,7 +146,12 @@ export async function GET(request: NextRequest) {
   // is actually for. The next run's backfill repairs any skipped day.
   let accessLog: { rolledDays: number; purgedRows: number } | { error: string };
   try {
-    const { data, error } = await getSupabaseAdmin().rpc('access_rollup');
+    // Aborting only cancels the HTTP request, not the SQL statement server-side —
+    // the rollup may still complete, which is safe since access_rollup() is
+    // atomic and idempotent.
+    const { data, error } = await getSupabaseAdmin()
+      .rpc('access_rollup')
+      .abortSignal(AbortSignal.timeout(ACCESS_ROLLUP_MS));
     if (error) throw new Error(error.message);
     accessLog = data as { rolledDays: number; purgedRows: number };
   } catch (err) {
