@@ -84,14 +84,19 @@ export default async function AdminPage() {
       );
       for (const [id, email] of lookups) emailById.set(id, email);
     }
-    logRows = (logRes.data ?? []).map((e) => ({
-      id: e.id as number,
-      created_at: e.created_at as string,
-      email: e.user_id ? emailById.get(e.user_id as string) ?? null : null,
-      event_type: e.event_type as string,
-      path: (e.path as string | null) ?? null,
-      country: (e.country as string | null) ?? null,
-    }));
+    logRows = (logRes.data ?? []).map((e) => {
+      const uid = (e.user_id as string | null) ?? null;
+      const email = uid ? emailById.get(uid) ?? null : null;
+      return {
+        id: e.id as number,
+        created_at: e.created_at as string,
+        email,
+        userIdShort: !email && uid ? uid.slice(0, 8) : null,
+        event_type: e.event_type as string,
+        path: (e.path as string | null) ?? null,
+        country: (e.country as string | null) ?? null,
+      };
+    });
 
     dailyRows = (dailyRes.data ?? []) as AccessDailyRow[];
   } catch (err) {

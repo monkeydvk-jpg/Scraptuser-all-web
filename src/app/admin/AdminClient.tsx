@@ -16,8 +16,12 @@ export interface AdminUserRow {
 export interface AccessEventRow {
   id: number;
   created_at: string;
-  /** null = anonymous visitor. */
+  /** null = the row has no user_id at all, i.e. a genuinely anonymous visitor. */
   email: string | null;
+  /** Set when the row HAS a user_id we could not resolve to an email — lookup
+   *  failed, was rate-limited, or the account was deleted. Never conflate with
+   *  anonymous: this panel must not report a real user as a guest. */
+  userIdShort: string | null;
   event_type: string;
   path: string | null;
   country: string | null;
@@ -179,7 +183,16 @@ export function AdminClient({ rows, logRows, dailyRows, selfId, errorMsg }: Prop
                   {logRows.map((e) => (
                     <tr key={e.id} style={{ cursor: 'default' }}>
                       <td className="mono" style={{ fontSize: 12 }}>{fmtDateTime(e.created_at)}</td>
-                      <td>{e.email ?? t('adm_log_guest')}</td>
+                      <td>
+                        {e.email ??
+                          (e.userIdShort ? (
+                            <span className="mono" style={{ fontSize: 12, color: 'var(--label-fg)' }}>
+                              {e.userIdShort}…
+                            </span>
+                          ) : (
+                            t('adm_log_guest')
+                          ))}
+                      </td>
                       <td>{e.event_type}</td>
                       <td className="mono" style={{ fontSize: 12, color: 'var(--label-fg)' }}>
                         {e.path ?? '—'}
