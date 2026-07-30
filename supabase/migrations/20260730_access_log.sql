@@ -105,11 +105,11 @@ begin
           < (now() at time zone 'Asia/Ho_Chi_Minh')::date
     group by 1
   )
-  insert into public.access_daily (day, pageviews, visitors)
+  insert into public.access_daily as d (day, pageviews, visitors)
   select day, pageviews, visitors from src
   on conflict (day) do update set
-    pageviews = greatest(public.access_daily.pageviews, excluded.pageviews),
-    visitors  = greatest(public.access_daily.visitors,  excluded.visitors);
+    pageviews = greatest(d.pageviews, excluded.pageviews),
+    visitors  = greatest(d.visitors,  excluded.visitors);
   get diagnostics rolled_days = row_count;
 
   delete from public.access_events where created_at < now() - interval '30 days';
@@ -123,3 +123,6 @@ $$;
 revoke all on function public.access_stats()  from anon, authenticated;
 revoke all on function public.access_rollup() from anon, authenticated;
 revoke all on function public.vn_today_start() from anon, authenticated;
+revoke all on function public.access_stats()  from public;
+revoke all on function public.access_rollup() from public;
+revoke all on function public.vn_today_start() from public;
