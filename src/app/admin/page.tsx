@@ -7,6 +7,15 @@ import { AdminClient, type AdminUserRow, type AccessEventRow, type AccessDailyRo
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * How many unknown user_ids from the log window we resolve to emails per page
+ * load. GoTrue's admin endpoints are rate-limited much harder than table reads,
+ * and this page is force-dynamic, so an uncapped fan-out re-fires on every
+ * refresh. Ids beyond the cap render as a short id fragment — visibly distinct
+ * from an anonymous visitor, so the cap degrades honestly rather than silently.
+ */
+const MAX_USER_LOOKUPS = 20;
+
 export default async function AdminPage() {
   const admin = await getAdminUser();
   if (!admin) redirect('/');
@@ -70,7 +79,7 @@ export default async function AdminPage() {
           .filter((id): id is string => !!id),
       ),
     );
-    const missingIds = logUserIds.filter((id) => !emailById.has(id));
+    const missingIds = logUserIds.filter((id) => !emailById.has(id)).slice(0, MAX_USER_LOOKUPS);
     if (missingIds.length > 0) {
       const lookups = await Promise.all(
         missingIds.map(async (id) => {
