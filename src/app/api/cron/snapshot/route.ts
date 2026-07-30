@@ -146,12 +146,23 @@ export async function GET(request: NextRequest) {
   // is actually for. The next run's backfill repairs any skipped day.
   let accessLog: { rolledDays: number; purgedRows: number } | { error: string };
   try {
+    // Budget-aware: the contributor/asset loops above can burn the whole
+    // OVERALL_BUDGET_MS, so adding a fresh, fixed ACCESS_ROLLUP_MS on top could
+    // push total wall-clock time past Vercel's hard `maxDuration` kill. Shrink
+    // the timeout to whatever is actually left (floored at 1s so a
+    // budget-starved run still gets a real attempt instead of an instant
+    // abort), leaving a 2s safety margin before the platform kills the
+    // function outright.
+    const rollupTimeoutMs = Math.max(
+      1_000,
+      Math.min(ACCESS_ROLLUP_MS, startedAt + maxDuration * 1_000 - 2_000 - Date.now()),
+    );
     // Aborting only cancels the HTTP request, not the SQL statement server-side —
     // the rollup may still complete, which is safe since access_rollup() is
     // atomic and idempotent.
     const { data, error } = await getSupabaseAdmin()
       .rpc('access_rollup')
-      .abortSignal(AbortSignal.timeout(ACCESS_ROLLUP_MS));
+      .abortSignal(AbortSignal.timeout(rollupTimeoutMs));
     if (error) throw new Error(error.message);
     accessLog = data as { rolledDays: number; purgedRows: number };
   } catch (err) {

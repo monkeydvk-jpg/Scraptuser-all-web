@@ -50,17 +50,30 @@ as $$
 $$;
 
 -- The three footer numbers in one round-trip.
--- total = completed days from the rollup + today's live count, so nothing is
--- counted twice: access_rollup() never writes a row for the current day.
+-- total = rolled-up days + every pageview on a day the rollup has not yet
+-- covered (see `live` below). That is equivalent to "completed days from the
+-- rollup + today's live count" only when the cron ran on schedule for every
+-- day up to and including yesterday; using "days after the last rolled-up
+-- day" instead of "today" keeps the total correct even if a cron run was
+-- delayed, skipped, or fired outside Vietnam's midnight (e.g. Vercel crons
+-- run in UTC), so no day is ever double-counted or silently dropped.
 create or replace function public.access_stats()
 returns json
 language sql
 stable
 as $$
   with rolled as (
-    select coalesce(sum(pageviews), 0)::bigint as n
+    select coalesce(sum(pageviews), 0)::bigint as n, max(day) as last_day
     from public.access_daily
-    where day < (now() at time zone 'Asia/Ho_Chi_Minh')::date
+  ),
+  live as (
+    -- Every pageview on a day the rollup has not yet covered. Independent of the
+    -- cron's schedule and of whether it ran, so the total never dips or drifts.
+    select count(*)::bigint as n
+    from public.access_events
+    where event_type = 'pageview'
+      and (created_at at time zone 'Asia/Ho_Chi_Minh')::date
+          > coalesce((select max(day) from public.access_daily), '-infinity'::date)
   ),
   today as (
     select count(*)::bigint as n
@@ -74,11 +87,25 @@ as $$
     where created_at > now() - interval '5 minutes'
   )
   select json_build_object(
-    'total',  rolled.n + today.n,
+    'total',  rolled.n + live.n,
     'today',  today.n,
     'online', online.n
   )
-  from rolled, today, online;
+  from rolled, live, today, online;
+$$;
+
+-- Per-user event counts, grouped in Postgres. Doing this by selecting every
+-- user_id into the app would be silently truncated by PostgREST's row cap and,
+-- with no ORDER BY, truncated arbitrarily — making the admin column meaningless.
+create or replace function public.access_user_event_counts()
+returns table (user_id uuid, n bigint)
+language sql
+stable
+as $$
+  select user_id, count(*)::bigint
+  from public.access_events
+  where user_id is not null
+  group by user_id;
 $$;
 
 -- Nightly: roll up every completed day still present in the detail table, then
@@ -123,6 +150,15 @@ $$;
 revoke all on function public.access_stats()  from anon, authenticated;
 revoke all on function public.access_rollup() from anon, authenticated;
 revoke all on function public.vn_today_start() from anon, authenticated;
+revoke all on function public.access_user_event_counts() from anon, authenticated;
 revoke all on function public.access_stats()  from public;
 revoke all on function public.access_rollup() from public;
 revoke all on function public.vn_today_start() from public;
+revoke all on function public.access_user_event_counts() from public;
+
+-- Explicit grant so this file is correct on its own, not dependent on whether
+-- Supabase's default privileges happened to apply when it ran.
+grant execute on function public.access_stats()    to service_role;
+grant execute on function public.access_rollup()   to service_role;
+grant execute on function public.vn_today_start()  to service_role;
+grant execute on function public.access_user_event_counts() to service_role;

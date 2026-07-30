@@ -43,13 +43,15 @@ interface Props {
   errorMsg: string | null;
 }
 
-const fmtDate = (iso: string | null) => (iso ? iso.slice(0, 10) : null);
 /**
- * Log rows need the time of day, which fmtDate deliberately drops.
  * Rendered in Asia/Ho_Chi_Minh to match the day boundary the rest of this
- * feature uses (access_daily rollups, purge cutoff) — the raw ISO string is
- * UTC and would otherwise show a different day/hour than the visitor saw.
+ * feature uses (access_daily rollups, purge cutoff, fmtDateTime below) — a
+ * bare `iso.slice(0, 10)` would read the UTC calendar day instead, which
+ * disagrees with fmtDateTime for any timestamp within ~7 hours of midnight UTC.
  */
+const fmtDate = (iso: string | null) =>
+  iso ? new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(iso)) : null;
+/** Log rows need the time of day, which fmtDate deliberately drops. */
 const fmtDateTime = (iso: string) => {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Ho_Chi_Minh',

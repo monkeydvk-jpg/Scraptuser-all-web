@@ -41,8 +41,20 @@ const VISITOR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 const MAX_PATH = 512;
 const MAX_REFERRER = 1024;
 const MAX_UA = 512;
+/** A country header is a 2-letter code; anything else is junk worth capping, not storing raw. */
+const MAX_COUNTRY = 8;
+
+/**
+ * A tracking insert must never hold a user-facing request open. logEvent cannot
+ * throw, but without this it can hang, and a hang on signUp would leave the
+ * account created and the session cookie undelivered.
+ */
+const INSERT_TIMEOUT_MS = 2_000;
 
 const BOT_RE = /bot|crawl|spider|slurp|headless|preview|monitor|curl|wget|python-requests/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** Bare IPv4/IPv6 literal only — no port suffix, no other junk that would fail the `inet` column. */
+const IP_RE = /^[0-9a-f.:]+$/i;
 
 export function isBot(ua: string | null | undefined): boolean {
   if (!ua) return true; // No user-agent at all is not a real browser.
@@ -59,10 +71,15 @@ export function visitorCookieOptions() {
   };
 }
 
-/** The visitor's id if they already have the cookie, else null. Never throws. */
+/**
+ * The visitor's id if they already have a valid cookie, else null. Never
+ * throws. A malformed/tampered value (not a uuid) is treated as absent so the
+ * caller re-mints a fresh one instead of pushing junk into the `uuid` column.
+ */
 export function readVisitorId(): string | null {
   try {
-    return cookies().get(VISITOR_COOKIE)?.value ?? null;
+    const v = cookies().get(VISITOR_COOKIE)?.value ?? null;
+    return v && UUID_RE.test(v) ? v : null;
   } catch {
     return null;
   }
@@ -87,19 +104,28 @@ export async function logEvent(input: AccessEventInput): Promise<void> {
     const visitorId = input.visitorId === undefined ? readVisitorId() : input.visitorId;
 
     // x-forwarded-for is a comma-separated chain; the client is the first entry.
-    const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() || null;
+    // Guarded against IP_RE: anything else (IPv6 with a %scope, garbage) would
+    // fail the `inet` column and silently drop the whole event below.
+    const ipRaw = h.get('x-forwarded-for')?.split(',')[0]?.trim() || null;
+    const ip = ipRaw && IP_RE.test(ipRaw) ? ipRaw : null;
 
-    const { error } = await getSupabaseAdmin().from('access_events').insert({
-      visitor_id: visitorId,
-      user_id: userId,
-      event_type: input.eventType,
-      path: truncate(input.path, MAX_PATH),
-      referrer: truncate(input.referrer, MAX_REFERRER),
-      country: h.get('x-vercel-ip-country'),
-      ip,
-      user_agent: truncate(userAgent, MAX_UA),
-      meta: input.meta ?? null,
-    });
+    const { error } = await getSupabaseAdmin()
+      .from('access_events')
+      .insert({
+        visitor_id: visitorId,
+        user_id: userId,
+        event_type: input.eventType,
+        path: truncate(input.path, MAX_PATH),
+        referrer: truncate(input.referrer, MAX_REFERRER),
+        country: truncate(h.get('x-vercel-ip-country'), MAX_COUNTRY),
+        ip,
+        user_agent: truncate(userAgent, MAX_UA),
+        meta: input.meta ?? null,
+      })
+      // A tracking insert must never hold a user-facing request open (see
+      // INSERT_TIMEOUT_MS above); this lands in the catch below like any
+      // other insert failure.
+      .abortSignal(AbortSignal.timeout(INSERT_TIMEOUT_MS));
     if (error) console.error('[accessLog] insert failed:', error.message);
   } catch (err) {
     console.error('[accessLog] logEvent threw:', err instanceof Error ? err.message : err);
