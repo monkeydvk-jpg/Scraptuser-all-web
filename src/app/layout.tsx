@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import { ThemedToaster } from '@/components/ThemedToaster';
 import { CommandPalette } from '@/components/CommandPalette';
 import { ThemeApplier } from '@/components/ThemeApplier';
+import { TrackPageview } from '@/components/TrackPageview';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
@@ -33,6 +34,7 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} antialiased`}
       >
         <ThemeApplier />
+        <TrackPageview />
         {children}
         <CommandPalette />
         <ThemedToaster />
