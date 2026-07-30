@@ -139,6 +139,20 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // ── Access-log housekeeping: roll up completed days, then purge old detail.
+  // Wrapped so a rollup failure can never fail the snapshot response the cron
+  // is actually for. The next run's backfill repairs any skipped day.
+  let accessLog: { rolledDays: number; purgedRows: number } | { error: string };
+  try {
+    const { data, error } = await getSupabaseAdmin().rpc('access_rollup');
+    if (error) throw new Error(error.message);
+    accessLog = data as { rolledDays: number; purgedRows: number };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('[cron] access_rollup failed:', message);
+    accessLog = { error: message };
+  }
+
   return NextResponse.json({
     crawled,
     failed: failures.length,
@@ -146,6 +160,7 @@ export async function GET(request: NextRequest) {
     assets_crawled: assetsCrawled,
     assets_failed: assetFailures.length,
     asset_failures: assetFailures,
+    accessLog,
     at: new Date().toISOString(),
   });
 }
