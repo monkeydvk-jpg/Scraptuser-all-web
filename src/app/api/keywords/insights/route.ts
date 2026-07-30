@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { logEvent } from '@/lib/accessLog';
 import { fetchAssets, searchCount } from '@/lib/adobeStock';
 import { analyze } from '@/lib/keywordInsights';
 import type { InsightsRequest } from '@/types';
@@ -38,6 +39,12 @@ export async function POST(request: NextRequest) {
       { mode, query, contentFilter, maxAssets, useGlobalCompetition, deadline },
       { fetchAssets, searchCount },
     );
+
+    await logEvent({
+      eventType: 'keywords',
+      path: '/api/keywords/insights',
+      meta: { mode, query },
+    });
 
     return NextResponse.json(result);
   } catch (error) {

@@ -222,6 +222,9 @@ export const STR: Record<string, Entry> = {
   footer_tagline: { vi: '✨ Stocklytics — bộ công cụ Adobe Stock', en: '✨ Stocklytics — Adobe Stock suite' },
   footer_sub: { vi: 'Giao diện web hiện đại, xử lý thời gian thực', en: 'Modern web interface with real-time processing' },
   footer_hint: { vi: 'Nhấn ⌘K để mở bảng lệnh', en: 'Press ⌘K to open command palette' },
+  footer_visits_total: { vi: 'lượt truy cập', en: 'visits' },
+  footer_visits_today: { vi: 'hôm nay', en: 'today' },
+  footer_visits_online: { vi: 'đang online', en: 'online' },
 
   // Command palette
   cmd_placeholder: { vi: 'Tìm lệnh hoặc trang…', en: 'Search commands or pages…' },
@@ -477,6 +480,19 @@ export const STR: Record<string, Entry> = {
     vi: 'Hiển thị tối đa 50 tài khoản đầu tiên.',
     en: 'Showing at most the first 50 accounts.',
   },
+  adm_log_title: { vi: 'Hoạt động gần đây', en: 'Recent activity' },
+  adm_log_time: { vi: 'Thời gian', en: 'Time' },
+  adm_log_who: { vi: 'Người dùng', en: 'User' },
+  adm_log_guest: { vi: 'Khách', en: 'Guest' },
+  adm_log_event: { vi: 'Hành động', en: 'Event' },
+  adm_log_path: { vi: 'Trang', en: 'Path' },
+  adm_log_country: { vi: 'Quốc gia', en: 'Country' },
+  adm_log_empty: { vi: 'Chưa có hoạt động nào.', en: 'No activity yet.' },
+  adm_daily_title: { vi: 'Thống kê theo ngày', en: 'Daily stats' },
+  adm_daily_day: { vi: 'Ngày', en: 'Day' },
+  adm_daily_pageviews: { vi: 'Lượt xem', en: 'Pageviews' },
+  adm_daily_visitors: { vi: 'Khách', en: 'Visitors' },
+  adm_col_events: { vi: 'Event 30 ngày', en: 'Events (30d)' },
 };
 
 export function t(lang: Lang, key: string): string {

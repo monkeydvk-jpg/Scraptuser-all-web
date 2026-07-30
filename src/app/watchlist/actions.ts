@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { getUser } from '@/lib/supabase/serverAuth';
+import { logEvent } from '@/lib/accessLog';
 
 /** Add (or re-label) a contributor on the signed-in user's watchlist. */
 export async function addContributor(formData: FormData): Promise<void> {
@@ -24,6 +25,12 @@ export async function addContributor(formData: FormData): Promise<void> {
   );
   if (error) throw new Error(`Không thêm được contributor: ${error.message}`);
 
+  await logEvent({
+    eventType: 'watchlist_add',
+    userId: user.id,
+    meta: { contributor_id: contributorId },
+  });
+
   revalidatePath('/watchlist');
 }
 
@@ -42,6 +49,12 @@ export async function removeContributor(formData: FormData): Promise<void> {
     .eq('user_id', user.id)
     .eq('contributor_id', contributorId);
   if (error) throw new Error(`Không xoá được contributor: ${error.message}`);
+
+  await logEvent({
+    eventType: 'watchlist_remove',
+    userId: user.id,
+    meta: { contributor_id: contributorId },
+  });
 
   revalidatePath('/watchlist');
 }
