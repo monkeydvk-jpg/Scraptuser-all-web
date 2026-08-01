@@ -14,6 +14,10 @@ import type { PortfolioOverview } from '@/lib/portfolioStats';
 
 type Phase = 'empty' | 'loading' | 'error' | 'results';
 
+// The scan fetches up to 2000 assets, so the list can go all the way to 2000.
+const TOP_N_OPTIONS = [100, 500, 1000, 2000] as const;
+type TopN = (typeof TOP_N_OPTIONS)[number];
+
 export default function AnalyticsPage() {
   const t = useT();
   const { theme } = useAppStore();
@@ -22,7 +26,7 @@ export default function AnalyticsPage() {
   const [data, setData] = useState<PortfolioOverview | null>(null);
   const [progress, setProgress] = useState(0);
   const [scanned, setScanned] = useState(0);
-  const [topN, setTopN] = useState<100 | 500>(100);
+  const [topN, setTopN] = useState<TopN>(100);
   const [sortKey, setSortKey] = useState<'dl' | 'title'>('dl');
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastQ = useRef('');
@@ -79,6 +83,7 @@ export default function AnalyticsPage() {
     .map(([id, v]) => ({ label: contentMeta(id) ? t(contentMeta(id)!.key) : id, value: Math.round((v / totalDl) * 100), color: contentMeta(id)?.color || theme.colors.accent }))
     .filter((d) => d.value > 0);
 
+  const available = data?.topDownloaded?.length ?? 0;
   const topList = (() => {
     const base = data?.topDownloaded ?? [];
     const sorted = sortKey === 'title'
@@ -244,7 +249,7 @@ export default function AnalyticsPage() {
                 <span className="ttl">{t('an_topdl')}</span>
                 <span className="sub">{t('an_topdl_sub')}</span>
                 <div className="row wrap" style={{ marginLeft: 'auto', gap: 6 }}>
-                  {([100, 500] as const).map((n) => (
+                  {TOP_N_OPTIONS.map((n) => (
                     <button
                       key={n}
                       className={'chip' + (topN === n ? ' sel' : '')}
@@ -254,6 +259,9 @@ export default function AnalyticsPage() {
                       Top {n}
                     </button>
                   ))}
+                  <span className="num" style={{ fontSize: 11.5, color: 'var(--label-fg)', alignSelf: 'center' }}>
+                    {fmt(topList.length)}/{fmt(available)}
+                  </span>
                   <button
                     className="chip"
                     onClick={() => setSortKey((k) => (k === 'dl' ? 'title' : 'dl'))}

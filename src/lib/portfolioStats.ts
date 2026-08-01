@@ -69,7 +69,7 @@ export interface PortfolioOverview {
   aiSplit?: AiSplit;
   topKeywords?: KeywordStat[];
   topMovers?: MoverAsset[];
-  topDownloaded?: MoverAsset[]; // assets ranked by total downloads (up to 500)
+  topDownloaded?: MoverAsset[]; // assets ranked by total downloads (up to 2000 = full scan)
   error?: string;
 }
 
@@ -202,7 +202,9 @@ export function computeOverview(
     .sort((a, b) => b.downloads - a.downloads)
     .slice(0, 20);
 
-  const topDownloaded = [...movers].sort((a, b) => b.nb_downloads - a.nb_downloads).slice(0, 500);
+  // Return every asset we scanned (fetchAssets caps the scan at 2000) so the UI can
+  // offer Top 100 / 500 / 1000 / 2000 without a second round-trip.
+  const topDownloaded = [...movers].sort((a, b) => b.nb_downloads - a.nb_downloads).slice(0, 2000);
   const topMovers = movers.sort((a, b) => b.velocity - a.velocity).slice(0, 8);
 
   return {
