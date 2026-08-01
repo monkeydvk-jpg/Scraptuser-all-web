@@ -12,6 +12,9 @@ import {
 } from '@/lib/proof';
 
 export const dynamic = 'force-dynamic';
+// The admin list must show what was just uploaded or deleted; without this it
+// can serve the snapshot from the first request of the process.
+export const fetchCache = 'force-no-store';
 
 function fail(code: ProofErrorCode, status: number) {
   return NextResponse.json({ error: code }, { status });

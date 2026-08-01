@@ -3,6 +3,13 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { PROOF_BUCKET, PROOF_LIMIT, type ProofEntry } from '@/lib/proof';
 
 export const dynamic = 'force-dynamic';
+// `force-dynamic` alone is not enough: it stops the ROUTE from being
+// prerendered, but supabase-js issues a plain GET through the patched global
+// fetch, and Next still puts that response in the Data Cache. A running server
+// then answers from a snapshot taken at its first request and never sees a
+// newly published entry. Verified against 14.2.5: without this line, a row
+// inserted after the first hit stays invisible until the process restarts.
+export const fetchCache = 'force-no-store';
 
 /**
  * The proof strip on the landing page. Always 200 with an array: an empty list

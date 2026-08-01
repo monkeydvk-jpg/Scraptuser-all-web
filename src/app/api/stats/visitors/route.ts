@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const dynamic = 'force-dynamic';
+// Without this the Supabase call lands in Next's Data Cache and the process
+// keeps replaying its first answer forever — measured: direct RPC 217/33/1
+// while this route still served 216/32/0. The 60s `s-maxage` below is the
+// intended cache window; that one expires, the Data Cache one does not.
+export const fetchCache = 'force-no-store';
 
 interface VisitorStats {
   total: number | null;
