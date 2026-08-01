@@ -2,6 +2,7 @@
 
 import { Users, Eye, Image as ImageIcon, AlertTriangle } from 'lucide-react';
 import { useT } from '@/lib/useT';
+import ProofAdmin from '@/components/ProofAdmin';
 
 export interface AdminUserRow {
   id: string;
@@ -232,6 +233,8 @@ export function AdminClient({ rows, logRows, dailyRows, selfId, errorMsg }: Prop
               </table>
             </div>
           </div>
+
+          <ProofAdmin />
         </>
       )}
     </div>

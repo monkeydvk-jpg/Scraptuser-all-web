@@ -7,6 +7,7 @@ import {
   Lock, ShieldCheck, FileDown, Palette, Check,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import ProofMarquee from '@/components/ProofMarquee';
 import { useAppStore } from '@/lib/store';
 import { useT } from '@/lib/useT';
 import type { Lang } from '@/lib/i18n';
@@ -116,6 +117,9 @@ export default function LandingPage() {
           </div>
         ))}
       </section>
+
+      {/* proof of use — real uploads by day */}
+      <ProofMarquee />
 
       {/* features */}
       <section id="features" className="lp-section">
