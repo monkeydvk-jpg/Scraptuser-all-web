@@ -124,7 +124,14 @@ async function main() {
     check('meta', `${path} title <= 60 chars`, title.length > 0 && title.length <= 60, `${title.length} chars`);
     check('meta', `${path} description exact`, desc === want.description, `got "${desc}"`);
     check('meta', `${path} description <= 155 chars`, desc.length > 0 && desc.length <= 155, `${desc.length} chars`);
-    check('meta', `${path} canonical is absolute on canonical host`, canonical === `${CANONICAL_HOST}${path}`, `got "${canonical}"`);
+    // Root is the one path where two spellings are the same URL: RFC 3986 treats an
+    // empty path as equivalent to "/", and Next strips the trailing slash under the
+    // default trailingSlash:false. Accept both for "/" only; every other route must
+    // match CANONICAL_HOST + path exactly.
+    const wantCanonical = path === '/'
+      ? [CANONICAL_HOST, `${CANONICAL_HOST}/`]
+      : [`${CANONICAL_HOST}${path}`];
+    check('meta', `${path} canonical is absolute on canonical host`, wantCanonical.includes(canonical), `got "${canonical}"`);
     check('meta', `${path} has og:title`, !!metaContent(body, 'og:title'));
     check('meta', `${path} has og:image`, !!metaContent(body, 'og:image'));
     check('meta', `${path} is not noindex`, !/noindex/i.test(metaContent(body, 'robots') || ''));
