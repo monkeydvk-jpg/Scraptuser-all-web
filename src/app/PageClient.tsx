@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import ProofMarquee from '@/components/ProofMarquee';
+import { FaqSection } from '@/components/landing/FaqSection';
 import { useAppStore } from '@/lib/store';
 import { useT } from '@/lib/useT';
 import type { Lang } from '@/lib/i18n';
@@ -201,6 +202,8 @@ export default function PageClient() {
         </div>
         <span className="lp-copy"><Check style={{ width: 13, height: 13 }} /> © Stocklytics</span>
       </footer>
+
+      <FaqSection />
     </div>
   );
 }

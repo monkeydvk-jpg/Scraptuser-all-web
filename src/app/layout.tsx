@@ -4,6 +4,8 @@ import { ThemedToaster } from '@/components/ThemedToaster';
 import { CommandPalette } from '@/components/CommandPalette';
 import { ThemeApplier } from '@/components/ThemeApplier';
 import { TrackPageview } from '@/components/TrackPageview';
+import { JsonLd } from '@/components/JsonLd';
+import { organizationSchema, webSiteSchema } from '@/lib/structured-data';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
 import './globals.css';
 
@@ -40,6 +42,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${inter.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} antialiased`}
       >
+        <JsonLd schema={[organizationSchema, webSiteSchema]} />
         <ThemeApplier />
         <TrackPageview />
         {children}

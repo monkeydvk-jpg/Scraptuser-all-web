@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { buildMetadata } from '@/lib/seo';
+import { JsonLd } from '@/components/JsonLd';
+import { breadcrumbSchema, softwareApplicationSchema } from '@/lib/structured-data';
 import GenerateClient from './GenerateClient';
 
 export const metadata: Metadata = buildMetadata({
@@ -10,5 +12,19 @@ export const metadata: Metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <GenerateClient />;
+  return (
+    <>
+      <JsonLd
+        schema={[
+          softwareApplicationSchema(
+            'Adobe Stock Prompt Generator',
+            '/generate',
+            'Scrape Adobe Stock titles and generate AI prompts in bulk with custom prefix, suffix, aspect ratio and parameters.',
+          ),
+          breadcrumbSchema('Prompt Generator', '/generate'),
+        ]}
+      />
+      <GenerateClient />
+    </>
+  );
 }

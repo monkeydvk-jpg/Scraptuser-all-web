@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { buildMetadata } from '@/lib/seo';
+import { JsonLd } from '@/components/JsonLd';
+import { faqPageSchema } from '@/lib/structured-data';
 import PageClient from './PageClient';
 
 export const metadata: Metadata = buildMetadata({
@@ -10,5 +12,10 @@ export const metadata: Metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <PageClient />;
+  return (
+    <>
+      <JsonLd schema={faqPageSchema()} />
+      <PageClient />
+    </>
+  );
 }
