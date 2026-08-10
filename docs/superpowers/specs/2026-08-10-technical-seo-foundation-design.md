@@ -166,7 +166,9 @@ Answer 3 must be worded so it cannot be read as an official Adobe figure. Accura
 
 ### 4.5 OG image
 
-Static `src/app/opengraph-image.png` (1200×630) referenced by `metadataBase`. A dynamic `ImageResponse` per route is deferred — it costs edge runtime per crawl for marginal benefit at this stage.
+One shared root `src/app/opengraph-image.tsx` (1200×630) using `ImageResponse` from `next/og`, resolved against `metadataBase`.
+
+`ImageResponse` here is **not** a per-request cost: for a static route Next.js evaluates the metadata image route at build time and serves the result as a static file. So this gets a real, version-controlled, reviewable image from code — no binary asset to hand-author, no runtime penalty. Per-route OG images are deferred; one sitewide image is enough at this stage.
 
 ### 4.6 Fonts / CWV
 
@@ -178,12 +180,12 @@ Three families for one app is still more weight than needed, but consolidating i
 
 ## 5. Files touched
 
-**New — infrastructure:** `src/app/robots.ts`, `src/app/sitemap.ts`, `src/lib/seo.ts`, `src/lib/structured-data.ts`, `src/app/opengraph-image.png`, `src/components/landing/FaqSection.tsx`
+**New — infrastructure:** `src/app/robots.ts`, `src/app/sitemap.ts`, `src/lib/seo.ts`, `src/lib/structured-data.ts`, `src/app/opengraph-image.tsx`, `src/components/landing/FaqSection.tsx`
 
 **New — client splits (§3.1), 5 files:** `src/app/PageClient.tsx`, `src/app/generate/GenerateClient.tsx`, `src/app/keywords/KeywordsClient.tsx`, `src/app/trends/TrendsClient.tsx`, `src/app/analytics/AnalyticsClient.tsx`
 
 **Modified:**
-- `src/lib/i18n.ts` — EN as server/initial default (§2.2)
+- `src/lib/store.ts` — `lang: 'vi'` → `lang: 'en'`, one line (§2.2)
 - `src/app/layout.tsx` — `metadataBase`, `Organization` + `WebSite` JSON-LD
 - 5 indexed `page.tsx` — rewritten as server shells (§3.1)
 - 4 noindexed `page.tsx` — add `buildMetadata({ noindex: true })`
