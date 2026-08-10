@@ -4,6 +4,7 @@ import { ThemedToaster } from '@/components/ThemedToaster';
 import { CommandPalette } from '@/components/CommandPalette';
 import { ThemeApplier } from '@/components/ThemeApplier';
 import { TrackPageview } from '@/components/TrackPageview';
+import { SITE_NAME, SITE_URL } from '@/lib/seo';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
@@ -11,10 +12,16 @@ const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mon
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-display' });
 
 export const metadata: Metadata = {
-  title: 'Stocklytics — Adobe Stock Suite',
-  description: 'Prompt generation, portfolio analytics, keyword insights & trends for Adobe Stock.',
-  keywords: ['adobe stock', 'prompt generator', 'analytics', 'keyword insights', 'trends'],
-  authors: [{ name: 'Stocklytics' }],
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'Stocklytics — Free Adobe Stock Keyword & Prompt Tools',
+    template: '%s',
+  },
+  description:
+    'Free Adobe Stock toolkit: bulk AI prompt generation, portfolio analytics, opportunity keyword research and trend tracking. No login required.',
+  applicationName: SITE_NAME,
+  referrer: 'origin-when-cross-origin',
+  formatDetection: { telephone: false, address: false, email: false },
 };
 
 export const viewport = {
