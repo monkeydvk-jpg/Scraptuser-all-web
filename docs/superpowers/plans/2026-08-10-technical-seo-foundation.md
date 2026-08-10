@@ -1307,3 +1307,17 @@ These are spec §6 and §7.8. The code work above is worthless without them.
 - [ ] Check the OG image with a real link preview (post the URL in Slack or use a card validator).
 
 **Expectation, stated plainly:** this gets the five pages correctly indexable — right language, crawlable, unique metadata, valid structured data. It is a precondition for ranking, not ranking. A new `.bond` domain with no backlinks will not rank for competitive head terms from this work alone. Realistic outcome is indexation within days-to-weeks of GSC submission and impressions on low-competition long-tail queries. Head terms need Phase 2: content depth and off-page signals, plus time.
+
+## Amendments
+
+Decisions taken during execution that change what this plan's text says. Later tasks and reviewers should treat these as governing.
+
+### 2026-08-10 — Task 1 harness: root canonical accepts either spelling
+
+**What the plan said:** the Task 1 harness asserts `canonical === CANONICAL_HOST + path` for every indexed route, and Task 4 Step 4 expected the `/` canonical row to start passing once `/` was split.
+
+**Why it changed:** Next.js normalizes `alternates.canonical` and strips the trailing slash under the default `trailingSlash: false`, so `/` always emits `https://stocklytic.bond`, never `https://stocklytic.bond/`. No change to `buildMetadata()` can satisfy the original assertion — verified directly against a running server. RFC 3986 treats an empty path as equivalent to `/`, and Google canonicalizes the two identically, so the assertion was wrong, not the implementation. The alternative (`trailingSlash: true`) was rejected: it rewrites every URL site-wide to satisfy one test row.
+
+**What it is now:** for `/` only, the harness accepts `https://stocklytic.bond` or `https://stocklytic.bond/`. Every other route still requires `CANONICAL_HOST + path` exactly. Production behaviour is unchanged — no product code was touched.
+
+**Effect on baselines:** the passing count after Task 4 is **43/89**, not the 42/89 a reader of the original text would predict. Group split at that point: `[lang] 6/6`, `[crawl] 8/18`, `[meta] 23/46`, `[jsonld] 6/17`, `[assets] 0/2`.
