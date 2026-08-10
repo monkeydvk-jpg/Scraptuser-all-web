@@ -22,6 +22,10 @@ export interface BuildMetadataOptions {
  */
 export function buildMetadata({ title, description, path, noindex = false }: BuildMetadataOptions): Metadata {
   const url = `${SITE_URL}${path}`;
+  // Absolute URL required: file-convention opengraph-image at the root segment is
+  // dropped (not merged) once a nested route defines its own `openGraph` object, so
+  // every route must restate its image explicitly here.
+  const ogImageUrl = `${SITE_URL}/opengraph-image`;
 
   return {
     title,
@@ -33,11 +37,13 @@ export function buildMetadata({ title, description, path, noindex = false }: Bui
       siteName: SITE_NAME,
       title,
       description,
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [ogImageUrl],
     },
     robots: noindex
       ? { index: false, follow: false }
