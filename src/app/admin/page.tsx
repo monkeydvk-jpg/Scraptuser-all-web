@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation';
+import type { Metadata } from 'next';
+import { buildMetadata } from '@/lib/seo';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
@@ -6,6 +8,13 @@ import { getAdminUser } from '@/lib/adminAuth';
 import { AdminClient, type AdminUserRow, type AccessEventRow, type AccessDailyRow } from './AdminClient';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = buildMetadata({
+  title: 'Admin — Stocklytics',
+  description: 'Internal admin dashboard.',
+  path: '/admin',
+  noindex: true,
+});
 
 /**
  * How many unknown user_ids from the log window we resolve to emails per page

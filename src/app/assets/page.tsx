@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+import { buildMetadata } from '@/lib/seo';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { redirect } from 'next/navigation';
@@ -7,6 +9,13 @@ import type { AssetGrowthRow, PendingAsset } from '@/lib/assetWatchlist';
 import { AssetsClient } from './AssetsClient';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = buildMetadata({
+  title: 'Assets — Stocklytics',
+  description: 'Your tracked Adobe Stock assets.',
+  path: '/assets',
+  noindex: true,
+});
 
 export default async function AssetsPage() {
   const user = await getUser();

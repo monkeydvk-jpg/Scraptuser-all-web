@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+import { buildMetadata } from '@/lib/seo';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { redirect } from 'next/navigation';
@@ -7,6 +9,13 @@ import type { WatchlistGrowthRow, PendingContributor } from '@/lib/watchlist';
 import { WatchlistClient } from './WatchlistClient';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = buildMetadata({
+  title: 'Watchlist — Stocklytics',
+  description: 'Your tracked Adobe Stock keywords and assets.',
+  path: '/watchlist',
+  noindex: true,
+});
 
 export default async function WatchlistPage() {
   const user = await getUser();
