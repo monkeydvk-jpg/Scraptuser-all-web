@@ -72,7 +72,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   // Language state
-  lang: 'vi',
+  lang: 'en',
   setLang: (lang: Lang) => set({ lang }),
 
   // Command palette
