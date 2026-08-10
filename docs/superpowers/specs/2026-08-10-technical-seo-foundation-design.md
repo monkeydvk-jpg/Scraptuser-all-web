@@ -23,7 +23,9 @@ Defect 1 is the root cause and must be fixed first — the other four are worthl
 
 ### Why defect 1 happens
 
-`src/lib/i18n.ts` initialises the language store from `localStorage` with a Vietnamese default. Language resolution runs **client-side after hydration**. The server renders Vietnamese, then the browser may swap to English. Googlebot indexes what the server sent.
+`src/lib/store.ts:75` hardcodes `lang: 'vi'` in a plain `create<AppStore>()` Zustand store. `src/lib/i18n.ts` is only a dictionary plus `t(lang, key)`; `src/lib/useT.ts` reads `lang` from the store.
+
+There is **no `persist` middleware and no `localStorage` anywhere in `src/`** (verified by grep). So the language is not a stored user preference at all — it is a hardcoded default of `'vi'` that resets on every full page load. Server and client both render Vietnamese, under `<html lang="en">`.
 
 ### Non-goals for this spec
 
@@ -52,14 +54,15 @@ For a new site with no backlinks, splitting authority is the wrong trade. Revisi
 
 ### 2.2 Implementation
 
-**Server default becomes English.** The language store's SSR/initial value is `'en'` unconditionally. Vietnamese is applied only after mount, from `localStorage`, by explicit user action.
+**The fix is one line:** `src/lib/store.ts:75`, `lang: 'vi'` → `lang: 'en'`.
 
-Consequences to handle:
-- The existing `suppressHydrationWarning` usage stays — a VI-preferring returning visitor will see a one-frame EN→VI swap. Acceptable: it affects returning humans only, never crawlers.
-- Every `<h1>`, meta title/description, and JSON-LD string in server output is English.
-- `<html lang="en">` becomes **truthful** rather than a lie. No change needed to the attribute itself.
+That is the entire change. Because there is no persistence layer (§1), there is no rehydration to reconcile, no hydration mismatch to suppress, and no localStorage migration. The existing `suppressHydrationWarning` on `<html>`/`<body>` is there for `ThemeApplier` and is unrelated — leave it alone.
 
-**Files:** `src/lib/i18n.ts` (initial state + `createJSONStorage` rehydration), `src/app/layout.tsx` (confirm no VI leakage).
+Consequences, stated honestly:
+- Every `<h1>`, meta string and JSON-LD string in server output becomes English. `<html lang="en">` becomes truthful instead of a lie. No change to the attribute itself.
+- **A Vietnamese user's toggle survives client-side navigation but not a hard reload** — it reverts to English. This is a pre-existing limitation of having no `persist` middleware; this spec does not introduce it and does not fix it. Adding `persist` is a separate, defensible change, deliberately out of scope here: it would put a `localStorage` read in the render path of the exact component tree we are trying to keep deterministic for crawlers. Revisit in Phase 2 if Vietnamese usage matters.
+
+**File:** `src/lib/store.ts` (one line). No changes needed in `i18n.ts`, `useT.ts`, or `layout.tsx` for this defect.
 
 **Verification:** `curl -s https://stocklytic.bond/ | grep -o '<h1[^>]*>[^<]*'` must return English text. This is the single most important assertion in the whole spec.
 
@@ -69,7 +72,9 @@ Consequences to handle:
 
 ### 3.1 Constraint: all 5 indexed routes are client components
 
-Verified: `/`, `/generate`, `/keywords`, `/trends`, `/analytics` each consist of a single `page.tsx` whose first line is `'use client'`. There is no existing server/client split anywhere — `export const metadata` currently appears in exactly one file in the app, `src/app/layout.tsx`.
+Verified: `/`, `/generate`, `/keywords`, `/trends`, `/analytics` each consist of a single `page.tsx` whose first line is `'use client'`. `export const metadata` currently appears in exactly one file in the app, `src/app/layout.tsx`.
+
+**Follow the existing precedent:** `src/app/login/` already uses this exact shape — a server `page.tsx` that imports `Header`/`Footer` and delegates interactivity to a sibling `'use client'` `LoginClient.tsx`. Mirror that structure and naming rather than inventing a new one.
 
 Next.js does **not** allow `export const metadata` from a client component. So per-route metadata is impossible without restructuring.
 
