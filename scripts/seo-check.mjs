@@ -144,11 +144,26 @@ async function main() {
   check('meta', 'all 5 titles distinct', titles.size === 5, `${titles.size} distinct`);
 
   for (const path of NOINDEXED) {
-    const { status, body } = await get(path);
+    const { status, body, headers } = await get(path);
     const ok = status === 200 || (status >= 300 && status < 400);
     check('meta', `${path} reachable (not blocked)`, ok, `status ${status}`);
     if (status === 200) {
       check('meta', `${path} is noindex`, /noindex/i.test(metaContent(body, 'robots') || ''));
+    } else if (status >= 300 && status < 400) {
+      // Bounded single-hop follow: resolve Location (may be relative) and assert
+      // the redirect *target* is noindex, so this can't silently no-op.
+      const location = headers.get('location');
+      let redirectsToNoindex = false;
+      let detail = 'no Location header';
+      if (location) {
+        const targetUrl = new URL(location, BASE + path);
+        const targetPath = targetUrl.pathname + targetUrl.search;
+        const target = await get(targetPath);
+        redirectsToNoindex =
+          target.status === 200 && /noindex/i.test(metaContent(target.body, 'robots') || '');
+        detail = `-> ${targetPath} status ${target.status}`;
+      }
+      check('meta', `${path} redirects to a noindex page`, redirectsToNoindex, detail);
     }
   }
 

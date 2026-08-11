@@ -168,7 +168,7 @@ Answer 3 must be worded so it cannot be read as an official Adobe figure. Accura
 
 One shared root `src/app/opengraph-image.tsx` (1200×630) using `ImageResponse` from `next/og`, resolved against `metadataBase`.
 
-`ImageResponse` here is **not** a per-request cost: for a static route Next.js evaluates the metadata image route at build time and serves the result as a static file. So this gets a real, version-controlled, reviewable image from code — no binary asset to hand-author, no runtime penalty. Per-route OG images are deferred; one sitewide image is enough at this stage.
+`ImageResponse` here **is** a per-request cost: the route exports `runtime = 'edge'` (required — without it `next build` fails outright with `TypeError: Invalid URL` from `@vercel/og`), and `next build` lists `/opengraph-image` as `ƒ` Dynamic — rendered on demand, per request, not prerendered as a static file. Vercel caches the response, so the per-request cost is amortised. It still gets a real, version-controlled, reviewable image from code — no binary asset to hand-author. Per-route OG images are deferred; one sitewide image is enough at this stage.
 
 ### 4.6 Fonts / CWV
 
