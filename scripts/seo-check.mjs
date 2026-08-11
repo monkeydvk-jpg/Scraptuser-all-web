@@ -2,8 +2,13 @@
 // Asserts the technical-SEO invariants from
 // docs/superpowers/specs/2026-08-10-technical-seo-foundation-design.md §7.
 // Usage: node scripts/seo-check.mjs [baseUrl]
+// Base URL resolution order: CLI arg > SEO_CHECK_BASE env var > localhost default,
+// so existing invocations (`npm run seo:check`) are unaffected.
 
-const BASE = (process.argv[2] || 'http://localhost:3000').replace(/\/$/, '');
+const BASE = (process.argv[2] || process.env.SEO_CHECK_BASE || 'http://localhost:3000').replace(
+  /\/$/,
+  ''
+);
 const CANONICAL_HOST = 'https://stocklytic.bond';
 
 const INDEXED = {
