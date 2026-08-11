@@ -1131,9 +1131,9 @@ git commit -m "feat(seo): add JSON-LD schemas and visible landing FAQ"
 
 **Interfaces:**
 - Consumes: `SITE_NAME` from `src/lib/seo.ts`.
-- Produces: `/icon` and `/opengraph-image`, both statically generated at build.
+- Produces: `/icon` and `/opengraph-image`, both rendered on demand by the edge runtime (verified: `next build` lists them as ƒ Dynamic, not prerendered).
 
-Both use `ImageResponse` from `next/og`. For static routes Next.js evaluates these at build time and serves plain files, so there is no per-request cost — and no binary asset to hand-author. No custom font is loaded, deliberately: `ImageResponse` would need to fetch and embed a font file, which is a build-time network dependency for no SEO gain.
+Both use `ImageResponse` from `next/og` and MUST export `runtime = 'edge'`. Without it `npm run build` fails outright with `TypeError: Invalid URL` from @vercel/og (empirically confirmed, not a graceful fallback). They are therefore request-time, not build-time; Vercel caches the responses so per-request cost is amortised — and no binary asset to hand-author. No custom font is loaded, deliberately: `ImageResponse` would need to fetch and embed a font file, which is a build-time network dependency for no SEO gain.
 
 - [ ] **Step 1: Create the favicon**
 
@@ -1227,7 +1227,7 @@ Open `http://localhost:3000/opengraph-image` in a browser and look at it. It is 
 
 ```bash
 git add src/app/icon.tsx src/app/opengraph-image.tsx
-git commit -m "feat(seo): generate favicon and OpenGraph image at build time"
+git commit -m "feat(seo): generate favicon and OpenGraph image at request time on the edge"
 ```
 
 ---
